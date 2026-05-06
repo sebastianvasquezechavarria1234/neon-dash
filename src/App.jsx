@@ -86,14 +86,38 @@ function App() {
 
     const drawPlayer = (ctx, p) => {
       ctx.save();
-      ctx.translate(p.x + p.size / 2, p.y + p.size / 2);
-      ctx.rotate(p.vy * 0.05); // Tilt based on velocity
       
+      // Calculate squash and stretch based on velocity
+      // Stretching when moving fast (jumping/falling), squashing when hitting floor
+      const stretch = Math.min(0.3, Math.abs(p.vy) * 0.02);
+      const scaleX = 1 - stretch;
+      const scaleY = 1 + stretch;
+
+      ctx.translate(p.x + p.size / 2, p.y + p.size / 2);
+      ctx.rotate(p.vy * 0.05);
+      ctx.scale(scaleX, scaleY);
+      
+      // Motion Trail (Ghosting effect)
+      ctx.globalAlpha = 0.3;
+      for(let i = 1; i <= 3; i++) {
+        ctx.save();
+        ctx.translate(-p.vy * i * 0.5, 0); // Trail follows velocity
+        ctx.beginPath();
+        ctx.moveTo(p.size / 2, 0);
+        ctx.lineTo(-p.size / 2, -p.size / 2);
+        ctx.lineTo(-p.size / 4, 0);
+        ctx.lineTo(-p.size / 2, p.size / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1.0;
+
       // Glow
-      ctx.shadowBlur = 20;
+      ctx.shadowBlur = 20 + Math.abs(p.vy);
       ctx.shadowColor = p.color;
       
-      // Main Body (Triangle/Arrowhead)
+      // Main Body
       ctx.fillStyle = p.color;
       ctx.beginPath();
       ctx.moveTo(p.size / 2, 0);
@@ -115,6 +139,7 @@ function App() {
       
       ctx.restore();
     };
+
 
     const drawObstacle = (ctx, obs) => {
       ctx.save();
