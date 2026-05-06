@@ -485,6 +485,7 @@ function App() {
       </header>
 
       <main className="canvas-wrapper">
+        <div className="crt-overlay"></div>
         <canvas 
           ref={canvasRef} 
           width={CANVAS_WIDTH} 

@@ -269,5 +269,49 @@ footer {
 
 @media (max-width: 600px) {
   .title-neon { font-size: 2.5rem; }
-  .canvas-wrapper { width: 95vw; }
+  .canvas-wrapper {
+    width: 95vw;
+  }
+}
+
+/* CRT & Scanline Filter */
+.crt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  background: 
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+    linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 3px, 3px 100%;
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+  opacity: 0.4;
+}
+
+.crt-overlay::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(18, 16, 16, 0.03);
+  opacity: 0;
+  z-index: 10;
+  pointer-events: none;
+  animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+  0% { opacity: 0.1; }
+  5% { opacity: 0.2; }
+  10% { opacity: 0.13; }
+  15% { opacity: 0.1; }
+  25% { opacity: 0.15; }
+  30% { opacity: 0.1; }
+  100% { opacity: 0.1; }
 }
