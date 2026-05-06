@@ -469,6 +469,17 @@ function App() {
             Neon Dash
           </motion.h1>
         </div>
+
+        <div className="difficulty-progress">
+          <div className="progress-track">
+            <motion.div 
+              className="progress-fill"
+              animate={{ width: `${Math.min(100, (score / 50) * 100)}%` }}
+              transition={{ type: "spring", stiffness: 50 }}
+            />
+          </div>
+          <span className="progress-label">Difficulty Level</span>
+        </div>
         
         <div className="header-right">
           <div className="stats-container">
