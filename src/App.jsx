@@ -613,17 +613,6 @@ function App() {
           </motion.h1>
         </div>
 
-        <div className="difficulty-progress">
-          <div className="progress-track">
-            <motion.div 
-              className="progress-fill"
-              animate={{ width: `${Math.min(100, (score / 50) * 100)}%` }}
-              transition={{ type: "spring", stiffness: 50 }}
-            />
-          </div>
-          <span className="progress-label">Difficulty Level</span>
-        </div>
-        
         <div className="header-right">
           <div className="stats-container">
             <div className="stat-item">
@@ -633,6 +622,16 @@ function App() {
             <div className="stat-item">
               <Trophy size={16} />
               <span>Best: {highScore}</span>
+            </div>
+            <div className="difficulty-progress">
+              <span className="progress-label">Difficulty</span>
+              <div className="progress-track">
+                <motion.div 
+                  className="progress-fill"
+                  animate={{ width: `${Math.min(100, (score / 50) * 100)}%` }}
+                  transition={{ type: "spring", stiffness: 50 }}
+                />
+              </div>
             </div>
             {gameState === 'playing' && (
               <button className="pause-btn" onClick={togglePause}>
