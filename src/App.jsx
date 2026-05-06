@@ -133,7 +133,7 @@ function App() {
     setGameState('playing');
     setIsPaused(false);
     gameRef.current = {
-      player: { x: 80, y: 200, vy: 0, size: 30, color: playerSkin, shield: false },
+      player: { x: 80, y: 200, vy: 0, size: 30, color: playerSkin, shield: false, jumps: 0 },
       obstacles: [],
       powerups: [],
       particles: [],
@@ -152,10 +152,14 @@ function App() {
 
   const handleAction = () => {
     if (gameState === 'playing' && !isPaused) {
-      gameRef.current.player.vy = JUMP_FORCE;
-      playSound('jump');
-      const pColor = gameRef.current.player.shield ? '#fff' : playerSkin;
-      createParticles(gameRef.current.player.x, gameRef.current.player.y + 15, pColor, 8);
+      const p = gameRef.current.player;
+      if (p.jumps < 2) {
+        p.vy = JUMP_FORCE;
+        p.jumps++;
+        playSound('jump');
+        const pColor = p.shield ? '#fff' : playerSkin;
+        createParticles(p.x, p.y + 15, pColor, p.jumps === 2 ? 15 : 8);
+      }
     } else if (gameState === 'idle' || gameState === 'gameOver') {
       startGame();
     }
@@ -278,6 +282,7 @@ function App() {
         if (g.player.y + g.player.size > CANVAS_HEIGHT) {
           g.player.y = CANVAS_HEIGHT - g.player.size;
           g.player.vy = 0;
+          g.player.jumps = 0; // Reset jumps
         }
         if (g.player.y < 0) {
           g.player.y = 0;
