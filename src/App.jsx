@@ -65,6 +65,16 @@ function App() {
   const [audioEnabled, setAudioEnabled] = useState(false);
   const audioCtx = useRef(null);
 
+  const speak = (text) => {
+    if (!audioEnabled) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.8;
+    utterance.pitch = 0.5;
+    utterance.volume = 0.4;
+    window.speechSynthesis.speak(utterance);
+  };
+
   const playSound = (type) => {
     if (!audioCtx.current) {
       audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -129,6 +139,7 @@ function App() {
       setAudioEnabled(true);
       if (audioCtx.current?.state === 'suspended') audioCtx.current.resume();
     }
+    speak("System active. Good luck pilot.");
     setScore(0);
     setGameState('playing');
     setIsPaused(false);
@@ -326,6 +337,7 @@ function App() {
           ) {
             g.player.shield = true;
             playSound('powerup');
+            speak("Shield synchronized.");
             g.powerups.splice(index, 1);
             createParticles(pu.x, pu.y, '#fff', 15);
           }
@@ -348,6 +360,7 @@ function App() {
             } else {
               setGameState('gameOver');
               playSound('hit');
+              speak("Critical failure. System reboot required.");
               g.shake = 15;
             }
           }
