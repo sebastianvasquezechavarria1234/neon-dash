@@ -11,10 +11,10 @@
 .title-neon {
   font-size: 4rem;
   margin: 0;
-  font-weight: 900;
+  font-weight: 1000;
   color: #fff;
-  letter-spacing: 0.1em;
-  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.05em;
+  font-family: 'Google Sans Flex', sans-serif;
   -webkit-text-stroke: 1px rgba(0, 242, 255, 0.5);
 }
 
