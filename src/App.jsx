@@ -53,8 +53,9 @@ function App() {
     setGameState('playing');
     setIsPaused(false);
     gameRef.current = {
-      player: { x: 80, y: 200, vy: 0, size: 30, color: '#00f2ff' },
+      player: { x: 80, y: 200, vy: 0, size: 30, color: '#00f2ff', shield: false },
       obstacles: [],
+      powerups: [],
       particles: [],
       frame: 0,
       speed: OBSTACLE_SPEED,
@@ -65,7 +66,8 @@ function App() {
   const handleAction = () => {
     if (gameState === 'playing' && !isPaused) {
       gameRef.current.player.vy = JUMP_FORCE;
-      createParticles(gameRef.current.player.x, gameRef.current.player.y + 15, '#00f2ff', 8);
+      const pColor = gameRef.current.player.shield ? '#fff' : '#00f2ff';
+      createParticles(gameRef.current.player.x, gameRef.current.player.y + 15, pColor, 8);
     } else if (gameState === 'idle' || gameState === 'gameOver') {
       startGame();
     }
@@ -106,9 +108,15 @@ function App() {
     const ctx = canvas.getContext('2d');
     let animationId;
 
+    const getDifficultyColor = (score) => {
+      if (score < 10) return '#ff0055'; // Red
+      if (score < 25) return '#ffaa00'; // Orange
+      if (score < 50) return '#a200ff'; // Purple
+      return '#00ff44'; // Green
+    };
+
     const drawPlayer = (ctx, p) => {
       ctx.save();
-      
       const stretch = Math.min(0.3, Math.abs(p.vy) * 0.02);
       const scaleX = 1 - stretch;
       const scaleY = 1 + stretch;
@@ -117,6 +125,18 @@ function App() {
       ctx.rotate(p.vy * 0.05);
       ctx.scale(scaleX, scaleY);
       
+      if (p.shield) {
+        ctx.save();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#fff';
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size * 0.8, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
       ctx.globalAlpha = 0.3;
       for(let i = 1; i <= 3; i++) {
         ctx.save();
@@ -134,7 +154,6 @@ function App() {
 
       ctx.shadowBlur = 20 + Math.abs(p.vy);
       ctx.shadowColor = p.color;
-      
       ctx.fillStyle = p.color;
       ctx.beginPath();
       ctx.moveTo(p.size / 2, 0);
@@ -152,50 +171,15 @@ function App() {
       ctx.lineTo(-p.size / 4, p.size / 4);
       ctx.closePath();
       ctx.fill();
-      
-      ctx.restore();
-    };
-
-    const drawObstacle = (ctx, obs) => {
-      ctx.save();
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = obs.color;
-      ctx.fillStyle = obs.color;
-      
-      ctx.beginPath();
-      if (obs.y === 0) {
-        ctx.moveTo(obs.x, 0);
-        ctx.lineTo(obs.x + obs.w, 0);
-        ctx.lineTo(obs.x + obs.w / 2, obs.h);
-      } else {
-        ctx.moveTo(obs.x, CANVAS_HEIGHT);
-        ctx.lineTo(obs.x + obs.w, CANVAS_HEIGHT);
-        ctx.lineTo(obs.x + obs.w / 2, CANVAS_HEIGHT - obs.h);
-      }
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      if (obs.y === 0) {
-        ctx.moveTo(obs.x + obs.w / 2, 0);
-        ctx.lineTo(obs.x + obs.w / 2, obs.h * 0.8);
-      } else {
-        ctx.moveTo(obs.x + obs.w / 2, CANVAS_HEIGHT);
-        ctx.lineTo(obs.x + obs.w / 2, CANVAS_HEIGHT - obs.h * 0.8);
-      }
-      ctx.stroke();
-      
       ctx.restore();
     };
 
     const loop = () => {
       const g = gameRef.current;
+      const obsColor = getDifficultyColor(score);
 
       if (!isPaused) {
         g.frame++;
-
         g.player.vy += GRAVITY;
         g.player.y += g.player.vy;
 
@@ -208,6 +192,16 @@ function App() {
           g.player.vy = 0;
         }
 
+        // Spawn Powerups
+        if (g.frame % 800 === 0) {
+          g.powerups.push({
+            x: CANVAS_WIDTH,
+            y: 100 + Math.random() * 200,
+            size: 20,
+            type: 'shield'
+          });
+        }
+
         if (g.frame % Math.max(40, Math.floor(SPAWN_RATE - score * 0.5)) === 0) {
           const height = 60 + Math.random() * 120;
           const isTop = Math.random() > 0.5;
@@ -216,23 +210,42 @@ function App() {
             y: isTop ? 0 : CANVAS_HEIGHT - height,
             w: 45,
             h: height,
-            color: '#ff0055'
+            color: obsColor
           });
         }
 
-        g.obstacles.forEach((obs) => {
+        g.powerups.forEach((pu, index) => {
+          pu.x -= g.speed;
+          if (
+            g.player.x < pu.x + pu.size &&
+            g.player.x + g.player.size > pu.x &&
+            g.player.y < pu.y + pu.size &&
+            g.player.y + g.player.size > pu.y
+          ) {
+            g.player.shield = true;
+            g.powerups.splice(index, 1);
+            createParticles(pu.x, pu.y, '#fff', 15);
+          }
+        });
+
+        g.obstacles.forEach((obs, index) => {
           obs.x -= g.speed + (score * 0.05);
-          
           if (
             g.player.x < obs.x + obs.w &&
             g.player.x + g.player.size > obs.x &&
             g.player.y < obs.y + obs.h &&
             g.player.y + g.player.size > obs.y
           ) {
-            setGameState('gameOver');
-            g.shake = 15;
+            if (g.player.shield) {
+              g.player.shield = false;
+              g.obstacles.splice(index, 1);
+              g.shake = 10;
+              createParticles(obs.x, obs.y, '#fff', 20);
+            } else {
+              setGameState('gameOver');
+              g.shake = 15;
+            }
           }
-
           if (obs.x + obs.w < g.player.x && !obs.passed) {
             obs.passed = true;
             setScore(s => s + 1);
@@ -240,6 +253,7 @@ function App() {
         });
 
         g.obstacles = g.obstacles.filter(obs => obs.x + obs.w > 0);
+        g.powerups = g.powerups.filter(pu => pu.x + pu.size > 0);
 
         g.particles.forEach(p => {
           p.x += p.vx;
@@ -258,42 +272,48 @@ function App() {
         ctx.translate((Math.random() - 0.5) * g.shake, (Math.random() - 0.5) * g.shake);
       }
 
-      ctx.strokeStyle = 'rgba(0, 242, 255, 0.08)';
+      // Grid Color Shift
+      ctx.strokeStyle = score > 25 ? 'rgba(162, 0, 255, 0.08)' : 'rgba(0, 242, 255, 0.08)';
       ctx.lineWidth = 1;
       for(let i=0; i<CANVAS_WIDTH + 100; i+=50) {
         const offset = (g.frame * (isPaused ? 0 : 2)) % 50;
-        ctx.beginPath();
-        ctx.moveTo(i - offset, 0);
-        ctx.lineTo(i - offset, CANVAS_HEIGHT);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(i - offset, 0); ctx.lineTo(i - offset, CANVAS_HEIGHT); ctx.stroke();
       }
       for(let i=0; i<CANVAS_HEIGHT; i+=50) {
-        ctx.beginPath();
-        ctx.moveTo(0, i);
-        ctx.lineTo(CANVAS_WIDTH, i);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CANVAS_WIDTH, i); ctx.stroke();
       }
 
-      g.particles.forEach(p => {
-        ctx.globalAlpha = p.life;
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, 3, 3);
+      g.powerups.forEach(pu => {
+        ctx.save();
+        ctx.shadowBlur = 15; ctx.shadowColor = '#fff';
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(pu.x + pu.size/2, pu.y + pu.size/2, pu.size/2, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
       });
-      ctx.globalAlpha = 1;
 
-      g.obstacles.forEach(obs => drawObstacle(ctx, obs));
+      g.obstacles.forEach(obs => {
+        ctx.save();
+        ctx.shadowBlur = 15; ctx.shadowColor = obs.color;
+        ctx.fillStyle = obs.color;
+        ctx.beginPath();
+        if (obs.y === 0) { ctx.moveTo(obs.x, 0); ctx.lineTo(obs.x + obs.w, 0); ctx.lineTo(obs.x + obs.w / 2, obs.h); }
+        else { ctx.moveTo(obs.x, CANVAS_HEIGHT); ctx.lineTo(obs.x + obs.w, CANVAS_HEIGHT); ctx.lineTo(obs.x + obs.w / 2, CANVAS_HEIGHT - obs.h); }
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        if (obs.y === 0) { ctx.moveTo(obs.x + obs.w / 2, 0); ctx.lineTo(obs.x + obs.w / 2, obs.h * 0.8); }
+        else { ctx.moveTo(obs.x + obs.w / 2, CANVAS_HEIGHT); ctx.lineTo(obs.x + obs.w / 2, CANVAS_HEIGHT - obs.h * 0.8); }
+        ctx.stroke();
+        ctx.restore();
+      });
 
       drawPlayer(ctx, g.player);
 
-      ctx.strokeStyle = 'rgba(0, 242, 255, 0.5)';
+      ctx.strokeStyle = score > 25 ? 'rgba(162, 0, 255, 0.5)' : 'rgba(0, 242, 255, 0.5)';
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(0, CANVAS_HEIGHT);
-      ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, CANVAS_HEIGHT); ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT); ctx.stroke();
 
       if (g.shake > 0) ctx.restore();
-
       animationId = requestAnimationFrame(loop);
     };
 
