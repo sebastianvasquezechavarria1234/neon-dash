@@ -176,6 +176,33 @@ footer {
   padding-bottom: 2px;
 }
 
+.history-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.history-title {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+  font-weight: 300;
+}
+
+.scores-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.history-score {
+  font-size: 1.2rem;
+  font-weight: 200;
+  color: #fff;
+  opacity: 0.6;
+}
+
 @media (max-width: 600px) {
   .title-neon { font-size: 2.5rem; }
   .canvas-wrapper { width: 95vw; }

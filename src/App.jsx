@@ -16,6 +16,7 @@ function App() {
   const [isPaused, setIsPaused] = useState(false);
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(() => parseInt(localStorage.getItem('neon-dash-highscore') || '0'));
+  const [history, setHistory] = useState(() => JSON.parse(localStorage.getItem('neon-dash-history') || '[]'));
   
   const gameRef = useRef({
     player: { x: 50, y: 200, vy: 0, size: 30, color: '#00f2ff' },
@@ -27,6 +28,19 @@ function App() {
   });
 
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
+
+  useEffect(() => {
+    if (gameState === 'gameOver') {
+      const newHistory = [score, ...history.filter(s => s !== score)].slice(0, 5);
+      setHistory(newHistory);
+      localStorage.setItem('neon-dash-history', JSON.stringify(newHistory));
+      
+      if (score > highScore) {
+        setHighScore(score);
+        localStorage.setItem('neon-dash-highscore', score.toString());
+      }
+    }
+  }, [gameState]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -423,6 +437,18 @@ function App() {
             >
               <h2>Critical Failure</h2>
               <p className="final-score">Score: {score}</p>
+              
+              {history.length > 0 && (
+                <div className="history-list">
+                  <p className="history-title">Recent Scores</p>
+                  <div className="scores-row">
+                    {history.map((s, i) => (
+                      <span key={i} className="history-score">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <button onClick={startGame} className="primary-btn retry-btn">
                 <RotateCcw size={20} />
                 Reboot System
