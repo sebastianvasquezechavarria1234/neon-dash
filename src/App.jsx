@@ -322,12 +322,12 @@ function App() {
           if (s.x < 0) s.x = CANVAS_WIDTH;
         });
 
-        // Speed Zones Spawning
-        if (g.frame % 600 === 0) {
+        // Speed Zones Spawning - more frequent, faster
+        if (g.frame % 200 === 0) {
           g.zones.push({
             x: CANVAS_WIDTH,
             y: 0,
-            w: 200,
+            w: 300,
             h: CANVAS_HEIGHT,
             type: Math.random() > 0.5 ? 'fast' : 'slow',
             color: 'rgba(0, 242, 255, 0.1)'
@@ -346,23 +346,22 @@ function App() {
         if (g.frame % currentSpawnRate === 0) {
           const height = 60 + Math.random() * 120;
           const isTop = Math.random() > 0.5;
-          const isMoving = score > 15 && Math.random() > 0.7;
+          const isMoving = score > 10 && Math.random() > 0.5;
           g.obstacles.push({
             x: CANVAS_WIDTH,
             y: isTop ? 0 : CANVAS_HEIGHT - height,
             w: 45,
             h: height,
             color: obsColor,
-            vy: isMoving ? (Math.random() - 0.5) * 4 : 0
+            vy: isMoving ? (Math.random() - 0.5) * 6 : 0
           });
         }
 
         // Update Zones
-        g.zones.forEach((z, index) => {
+        g.zones.forEach((z) => {
           z.x -= currentSpeed;
           if (g.player.x > z.x && g.player.x < z.x + z.w) {
-            // Speed Modifier
-            g.speedMod = z.type === 'fast' ? 1.5 : 0.6;
+            g.speedMod = z.type === 'fast' ? 2.2 : 0.7;
           } else {
             g.speedMod = 1;
           }
