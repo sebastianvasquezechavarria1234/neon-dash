@@ -516,12 +516,12 @@ function App() {
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
-              className="overlay"
+              className="overlay pause-modal"
             >
-              <h2>Paused</h2>
-              <button onClick={togglePause} className="primary-btn">
-                <PlayCircle size={24} />
-                Resume
+              <h2 className="pause-title">Paused</h2>
+              <button onClick={togglePause} className="primary-btn resume-btn">
+                <Play size={16} strokeWidth={1.5} />
+                Resume Mission
               </button>
             </motion.div>
           )}

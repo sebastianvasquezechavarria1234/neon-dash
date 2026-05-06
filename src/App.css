@@ -111,8 +111,32 @@ canvas {
   font-size: 3rem;
   color: #ff0055;
   margin: 0;
-  font-weight: 800;
-  text-shadow: 0 0 20px rgba(255, 0, 85, 0.5);
+  font-weight: 100;
+  text-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
+  font-family: 'Google Sans Flex', sans-serif;
+  letter-spacing: 0;
+}
+
+.pause-title {
+  color: #fff !important;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.2) !important;
+  margin-bottom: 1rem !important;
+}
+
+.resume-btn {
+  font-weight: 200 !important;
+  letter-spacing: 0.05em;
+  background: #00f2ff !important;
+  border: none !important;
+  color: #000 !important;
+  box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
+  padding: 0.8rem 1.5rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.resume-btn:hover {
+  background: #fff !important;
+  transform: scale(1.05) translateY(2px) !important;
 }
 
 .primary-btn {
@@ -121,7 +145,7 @@ canvas {
   border: none;
   padding: 1rem 2.5rem;
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 300;
   border-radius: 50px;
   display: flex;
   align-items: center;
@@ -174,15 +198,23 @@ canvas {
   box-shadow: 0 0 30px rgba(255, 0, 85, 0.6);
 }
 
+p, a {
+  font-size: 7px;
+  text-transform: none;
+  letter-spacing: 0.05em;
+}
+
 .controls-hint {
   color: rgba(255, 255, 255, 0.5);
-  font-size: 1rem;
+  font-size: 7px;
+  margin-top: 1rem;
 }
 
 .final-score {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: #fff;
   margin: 0;
+  font-weight: 200;
 }
 
 footer {
@@ -195,7 +227,7 @@ footer {
 }
 
 .footer-text {
-  font-size: 0.75rem;
+  font-size: 7px;
   color: rgba(255, 255, 255, 0.4);
   font-weight: 200;
   letter-spacing: 0.02em;
@@ -213,10 +245,14 @@ footer {
 }
 
 .history-title {
-  font-size: 0.8rem;
+  font-size: 7px;
   color: rgba(255, 255, 255, 0.4);
   margin: 0;
   font-weight: 300;
+}
+
+.stat-item span {
+  font-size: 0.8rem;
 }
 
 .scores-row {
