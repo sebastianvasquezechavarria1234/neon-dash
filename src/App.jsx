@@ -164,13 +164,11 @@ function App() {
   const handleAction = () => {
     if (gameState === 'playing' && !isPaused) {
       const p = gameRef.current.player;
-      if (p.jumps < 2) {
-        p.vy = JUMP_FORCE;
-        p.jumps++;
-        playSound('jump');
-        const pColor = p.shield ? '#fff' : playerSkin;
-        createParticles(p.x, p.y + 15, pColor, p.jumps === 2 ? 15 : 8);
-      }
+      p.vy = JUMP_FORCE;
+      p.jumps++;
+      playSound('jump');
+      const pColor = p.shield ? '#fff' : playerSkin;
+      createParticles(p.x, p.y + 15, pColor, 10);
     } else if (gameState === 'idle' || gameState === 'gameOver') {
       startGame();
     }
@@ -587,7 +585,7 @@ function App() {
 
               <button onClick={startGame} className="primary-btn retry-btn">
                 <RotateCcw size={20} />
-                Reboot System
+                <span>Reboot System</span>
               </button>
             </motion.div>
           )}
