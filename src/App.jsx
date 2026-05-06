@@ -245,6 +245,10 @@ function App() {
     const loop = () => {
       const g = gameRef.current;
       const obsColor = getDifficultyColor(score);
+      
+      // Calculate dynamic speed and spawn rate
+      const currentSpeed = OBSTACLE_SPEED + (score * 0.15); // Faster increase
+      const currentSpawnRate = Math.max(35, Math.floor(SPAWN_RATE - score * 0.8));
 
       if (!isPaused) {
         g.frame++;
@@ -262,7 +266,7 @@ function App() {
 
         // Parallax Stars
         g.stars.forEach(s => {
-          s.x -= s.speed;
+          s.x -= s.speed + (score * 0.05); // Stars speed up too!
           if (s.x < 0) s.x = CANVAS_WIDTH;
         });
 
@@ -270,12 +274,12 @@ function App() {
           g.powerups.push({
             x: CANVAS_WIDTH,
             y: 100 + Math.random() * 200,
-            size: 20,
+            size: 25,
             type: 'shield'
           });
         }
 
-        if (g.frame % Math.max(40, Math.floor(SPAWN_RATE - score * 0.5)) === 0) {
+        if (g.frame % currentSpawnRate === 0) {
           const height = 60 + Math.random() * 120;
           const isTop = Math.random() > 0.5;
           g.obstacles.push({
@@ -288,7 +292,7 @@ function App() {
         }
 
         g.powerups.forEach((pu, index) => {
-          pu.x -= g.speed;
+          pu.x -= currentSpeed;
           if (
             g.player.x < pu.x + pu.size &&
             g.player.x + g.player.size > pu.x &&
@@ -303,7 +307,7 @@ function App() {
         });
 
         g.obstacles.forEach((obs, index) => {
-          obs.x -= g.speed + (score * 0.05);
+          obs.x -= currentSpeed;
           if (
             g.player.x < obs.x + obs.w &&
             g.player.x + g.player.size > obs.x &&
@@ -327,6 +331,7 @@ function App() {
             setScore(s => s + 1);
           }
         });
+
 
         g.obstacles = g.obstacles.filter(obs => obs.x + obs.w > 0);
         g.powerups = g.powerups.filter(pu => pu.x + pu.size > 0);
@@ -368,8 +373,24 @@ function App() {
       g.powerups.forEach(pu => {
         ctx.save();
         ctx.shadowBlur = 20; ctx.shadowColor = '#fff';
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.beginPath(); ctx.arc(pu.x + pu.size/2, pu.y + pu.size/2, pu.size/2, 0, Math.PI*2); ctx.fill();
+        
+        // Draw Shield Icon inside orb
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const cx = pu.x + pu.size/2;
+        const cy = pu.y + pu.size/2;
+        const s = pu.size * 0.3;
+        ctx.moveTo(cx, cy - s);
+        ctx.lineTo(cx + s, cy - s/2);
+        ctx.lineTo(cx + s, cy + s/2);
+        ctx.lineTo(cx, cy + s);
+        ctx.lineTo(cx - s, cy + s/2);
+        ctx.lineTo(cx - s, cy - s/2);
+        ctx.closePath();
+        ctx.stroke();
         ctx.restore();
       });
 
@@ -398,6 +419,7 @@ function App() {
       if (g.shake > 0) ctx.restore();
       animationId = requestAnimationFrame(loop);
     };
+
 
     animationId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animationId);
