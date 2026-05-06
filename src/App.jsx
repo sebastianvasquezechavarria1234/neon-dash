@@ -279,6 +279,14 @@ function App() {
       // Draw Player
       drawPlayer(ctx, g.player);
 
+      // Draw Floor Border
+      ctx.strokeStyle = 'rgba(0, 242, 255, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, CANVAS_HEIGHT);
+      ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT);
+      ctx.stroke();
+
       if (g.shake > 0) ctx.restore();
 
       animationId = requestAnimationFrame(loop);
@@ -310,16 +318,16 @@ function App() {
         
         <div className="header-right">
           <div className="stats-container">
-            <div className="stat-item glass-card">
+            <div className="stat-item">
               <Zap size={16} className="icon-pulse" />
               <span>Score: {score}</span>
             </div>
-            <div className="stat-item glass-card">
+            <div className="stat-item">
               <Trophy size={16} />
               <span>Best: {highScore}</span>
             </div>
             {gameState === 'playing' && (
-              <button className="pause-btn glass-card" onClick={togglePause}>
+              <button className="pause-btn" onClick={togglePause}>
                 {isPaused ? <PlayCircle size={20} /> : <Pause size={20} />}
               </button>
             )}
@@ -327,7 +335,8 @@ function App() {
         </div>
       </header>
 
-      <main className="canvas-wrapper glass-card">
+      <main className="canvas-wrapper">
+
         <canvas 
           ref={canvasRef} 
           width={CANVAS_WIDTH} 
@@ -382,7 +391,7 @@ function App() {
       </main>
 
       <footer>
-        <p className="footer-text">Survive the Neon Grid</p>
+        <p className="footer-text">Created by Sebastian Vasquez Echavarria</p>
       </footer>
     </div>
   )
