@@ -266,6 +266,27 @@ footer {
   letter-spacing: 0.1em;
 }
 
+.rank-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem 0;
+  gap: 0.2rem;
+}
+
+.rank-label {
+  font-size: 7px;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+}
+
+.rank-name {
+  font-size: 1.5rem;
+  font-weight: 100;
+  color: #00f2ff;
+  text-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+}
+
 .history-list {
   display: flex;
   flex-direction: column;

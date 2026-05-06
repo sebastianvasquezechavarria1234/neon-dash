@@ -550,6 +550,15 @@ function App() {
               className="overlay game-over"
             >
               <h2>Critical Failure</h2>
+              <div className="rank-container">
+                <span className="rank-label">Rank Status</span>
+                <span className="rank-name">
+                  {score < 10 ? 'Recruit' : 
+                   score < 25 ? 'Pilot' : 
+                   score < 50 ? 'Veteran' : 
+                   score < 80 ? 'Phantom' : 'Neon God'}
+                </span>
+              </div>
               <p className="final-score">Score: {score}</p>
               
               {history.length > 0 && (
