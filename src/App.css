@@ -133,25 +133,41 @@ canvas {
 }
 
 .pause-title {
-  color: #fff !important;
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.2) !important;
-  margin-bottom: 1rem !important;
+  color: #fff !important; /* Reverted to white */
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.2) !important;
+  margin-bottom: 2rem !important;
 }
 
 .resume-btn {
-  font-weight: 200 !important;
-  letter-spacing: 0.05em;
-  background: #00f2ff !important;
-  border: none !important;
-  color: #000 !important;
-  box-shadow: 0 0 15px rgba(0, 242, 255, 0.4) !important;
-  padding: 0.8rem 1.5rem !important;
-  margin-top: 1.5rem !important;
+  background: transparent !important;
+  color: #00f2ff !important; /* Keep cyan for resume */
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500 !important;
+  text-transform: none;
+  letter-spacing: 0.1em;
+  padding: 0.8rem 2.5rem !important;
+  font-size: 0.9rem !important;
+  border: 1px solid #00f2ff !important;
+  border-radius: 0 !important;
+  transform: skew(-15deg);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: visible;
+  box-shadow: none !important;
+  margin-top: 1rem !important;
+}
+
+.resume-btn span {
+  display: inline-block;
+  transform: skew(15deg);
 }
 
 .resume-btn:hover {
-  background: #fff !important;
-  transform: scale(1.05) translateY(2px) !important;
+  background: #00f2ff !important;
+  color: #000 !important;
+  transform: skew(-15deg) scale(1.05);
+  box-shadow: none !important;
+  animation: button-glitch 0.3s infinite;
 }
 
 .primary-btn {

@@ -144,10 +144,18 @@ function App() {
     setGameState('playing');
     setIsPaused(false);
     gameRef.current = {
-      player: { x: 80, y: 200, vy: 0, size: 30, color: playerSkin, shield: false, jumps: 0 },
+      player: { x: 80, y: 200, vy: 0, size: 30, color: playerSkin, shield: false, jumps: 0, trail: [] },
       obstacles: [],
       powerups: [],
       particles: [],
+      zones: [],
+      buildings: Array.from({ length: 15 }, (_, i) => ({
+        x: i * 150,
+        y: 150 + Math.random() * 150,
+        w: 100 + Math.random() * 80,
+        speed: 0.2 + Math.random() * 0.3,
+        color: `rgba(${Math.random() * 50}, ${Math.random() * 20}, ${40 + Math.random() * 40}, 0.3)`
+      })),
       stars: Array.from({ length: 50 }, () => ({
         x: Math.random() * CANVAS_WIDTH,
         y: Math.random() * CANVAS_HEIGHT,
@@ -156,7 +164,8 @@ function App() {
       })),
       frame: 0,
       speed: OBSTACLE_SPEED,
-      shake: 0
+      shake: 0,
+      flash: null
     };
   };
 
@@ -298,11 +307,32 @@ function App() {
           g.player.vy = 0;
         }
 
+        // Parallax City Background
+        g.buildings.forEach(b => {
+          b.x -= b.speed + (score * 0.02);
+          if (b.x + b.w < 0) {
+            b.x = CANVAS_WIDTH + Math.random() * 100;
+            b.y = 150 + Math.random() * 150;
+          }
+        });
+
         // Parallax Stars
         g.stars.forEach(s => {
-          s.x -= s.speed + (score * 0.05); // Stars speed up too!
+          s.x -= s.speed + (score * 0.05); 
           if (s.x < 0) s.x = CANVAS_WIDTH;
         });
+
+        // Speed Zones Spawning
+        if (g.frame % 600 === 0) {
+          g.zones.push({
+            x: CANVAS_WIDTH,
+            y: 0,
+            w: 200,
+            h: CANVAS_HEIGHT,
+            type: Math.random() > 0.5 ? 'fast' : 'slow',
+            color: 'rgba(0, 242, 255, 0.1)'
+          });
+        }
 
         if (g.frame % 800 === 0) {
           g.powerups.push({
@@ -316,17 +346,36 @@ function App() {
         if (g.frame % currentSpawnRate === 0) {
           const height = 60 + Math.random() * 120;
           const isTop = Math.random() > 0.5;
+          const isMoving = score > 15 && Math.random() > 0.7;
           g.obstacles.push({
             x: CANVAS_WIDTH,
             y: isTop ? 0 : CANVAS_HEIGHT - height,
             w: 45,
             h: height,
-            color: obsColor
+            color: obsColor,
+            vy: isMoving ? (Math.random() - 0.5) * 4 : 0
           });
         }
 
+        // Update Zones
+        g.zones.forEach((z, index) => {
+          z.x -= currentSpeed;
+          if (g.player.x > z.x && g.player.x < z.x + z.w) {
+            // Speed Modifier
+            g.speedMod = z.type === 'fast' ? 1.5 : 0.6;
+          } else {
+            g.speedMod = 1;
+          }
+        });
+
+        const effectiveSpeed = currentSpeed * (g.speedMod || 1);
+
+        // Update Player Trail
+        g.player.trail.unshift({ x: g.player.x, y: g.player.y });
+        if (g.player.trail.length > 15) g.player.trail.pop();
+
         g.powerups.forEach((pu, index) => {
-          pu.x -= currentSpeed;
+          pu.x -= effectiveSpeed;
           if (
             g.player.x < pu.x + pu.size &&
             g.player.x + g.player.size > pu.x &&
@@ -336,13 +385,27 @@ function App() {
             g.player.shield = true;
             playSound('powerup');
             speak("Shield synchronized.");
+            g.flash = { color: '#fff', alpha: 0.5 };
             g.powerups.splice(index, 1);
             createParticles(pu.x, pu.y, '#fff', 15);
           }
         });
 
         g.obstacles.forEach((obs, index) => {
-          obs.x -= currentSpeed;
+          obs.x -= effectiveSpeed;
+          if (obs.vy !== 0) {
+            obs.y += obs.vy;
+            if (obs.y < 0 || obs.y + obs.h > CANVAS_HEIGHT) obs.vy *= -1;
+          }
+
+          // Proximity Combo (Close Call)
+          const dist = Math.hypot(g.player.x - obs.x, g.player.y - obs.y);
+          if (dist < 60 && !obs.closeCall && !obs.passed) {
+            obs.closeCall = true;
+            setScore(s => s + 2); // Double points for risk
+            createParticles(g.player.x, g.player.y, '#ffaa00', 5);
+          }
+
           if (
             g.player.x < obs.x + obs.w &&
             g.player.x + g.player.size > obs.x &&
@@ -352,6 +415,7 @@ function App() {
             if (g.player.shield) {
               g.player.shield = false;
               playSound('hit');
+              g.flash = { color: '#ff0055', alpha: 0.3 };
               g.obstacles.splice(index, 1);
               g.shake = 10;
               createParticles(obs.x, obs.y, '#fff', 20);
@@ -359,6 +423,7 @@ function App() {
               setGameState('gameOver');
               playSound('hit');
               speak("Critical failure. System reboot required.");
+              g.flash = { color: '#ff0055', alpha: 0.8 };
               g.shake = 15;
             }
           }
@@ -368,9 +433,14 @@ function App() {
           }
         });
 
+        if (g.flash) {
+          g.flash.alpha -= 0.05;
+          if (g.flash.alpha <= 0) g.flash = null;
+        }
 
-        g.obstacles = g.obstacles.filter(obs => obs.x + obs.w > 0);
+        g.obstacles = g.obstacles.filter(obs => obs.x + obs.w > -100);
         g.powerups = g.powerups.filter(pu => pu.x + pu.size > 0);
+        g.zones = g.zones.filter(z => z.x + z.w > 0);
 
         g.particles.forEach(p => {
           p.x += p.vx;
@@ -405,6 +475,37 @@ function App() {
       for(let i=0; i<CANVAS_HEIGHT; i+=50) {
         ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CANVAS_WIDTH, i); ctx.stroke();
       }
+
+      // Draw City Buildings (Parallax Background)
+      g.buildings.forEach(b => {
+        ctx.fillStyle = b.color;
+        ctx.fillRect(b.x, CANVAS_HEIGHT - b.y, b.w, b.y);
+        // Neon window lights
+        ctx.fillStyle = 'rgba(0, 242, 255, 0.15)';
+        for(let i = 0; i < 3; i++) {
+          for(let j = 0; j < 6; j++) {
+            if((b.x + i + j) % 3 !== 0)
+              ctx.fillRect(b.x + 8 + i * 22, CANVAS_HEIGHT - b.y + 10 + j * 28, 12, 14);
+          }
+        }
+      });
+
+      // Draw Speed Zones
+      g.zones.forEach(z => {
+        const gradient = ctx.createLinearGradient(z.x, 0, z.x + z.w, 0);
+        const zColor = z.type === 'fast' ? 'rgba(0, 242, 255, 0.12)' : 'rgba(255, 0, 85, 0.12)';
+        gradient.addColorStop(0, 'transparent');
+        gradient.addColorStop(0.5, zColor);
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(z.x, z.y, z.w, z.h);
+        // Zone label
+        ctx.save();
+        ctx.fillStyle = z.type === 'fast' ? 'rgba(0, 242, 255, 0.6)' : 'rgba(255, 0, 85, 0.6)';
+        ctx.font = '10px Orbitron';
+        ctx.fillText(z.type === 'fast' ? '▶▶ BOOST' : '◀◀ SLOW', z.x + 20, CANVAS_HEIGHT / 2);
+        ctx.restore();
+      });
 
       g.powerups.forEach(pu => {
         ctx.save();
@@ -446,7 +547,39 @@ function App() {
         ctx.restore();
       });
 
+      // Draw Player Trail (TRON-style)
+      g.player.trail.forEach((pos, i) => {
+        const alpha = (g.player.trail.length - i) / (g.player.trail.length * 2);
+        ctx.globalAlpha = alpha;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = g.player.color;
+        ctx.fillStyle = g.player.color;
+        ctx.save();
+        ctx.translate(pos.x + g.player.size / 2, pos.y + g.player.size / 2);
+        const scale = 0.9 - (i * 0.05);
+        ctx.scale(Math.max(scale, 0.1), Math.max(scale, 0.1));
+        ctx.beginPath();
+        ctx.moveTo(g.player.size / 2, 0);
+        ctx.lineTo(-g.player.size / 2, -g.player.size / 2);
+        ctx.lineTo(-g.player.size / 4, 0);
+        ctx.lineTo(-g.player.size / 2, g.player.size / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      });
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+
       drawPlayer(ctx, g.player);
+
+      // Screen Flash Effect
+      if (g.flash && g.flash.alpha > 0) {
+        ctx.save();
+        ctx.globalAlpha = g.flash.alpha;
+        ctx.fillStyle = g.flash.color;
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctx.restore();
+      }
 
       ctx.strokeStyle = score > 25 ? 'rgba(162, 0, 255, 0.6)' : 'rgba(0, 242, 255, 0.6)';
       ctx.lineWidth = 3;
@@ -549,7 +682,7 @@ function App() {
               <h2 className="pause-title">Paused</h2>
               <button onClick={togglePause} className="primary-btn resume-btn">
                 <Play size={16} strokeWidth={1.5} />
-                Resume Mission
+                <span>Resume Mission</span>
               </button>
             </motion.div>
           )}
