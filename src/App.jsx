@@ -322,14 +322,14 @@ function App() {
           if (s.x < 0) s.x = CANVAS_WIDTH;
         });
 
-        // Speed Zones Spawning - more frequent, faster
+        // Speed Zones Spawning - BOOST only
         if (g.frame % 200 === 0) {
           g.zones.push({
             x: CANVAS_WIDTH,
             y: 0,
-            w: 300,
+            w: 700,
             h: CANVAS_HEIGHT,
-            type: Math.random() > 0.5 ? 'fast' : 'slow',
+            type: 'fast',
             color: 'rgba(0, 242, 255, 0.1)'
           });
         }
@@ -659,13 +659,13 @@ function App() {
               exit={{ opacity: 0 }}
               className="overlay"
             >
-              <button className="primary-btn neon-border">
-                <Play size={24} />
-                Start Mission
+              <button className="primary-btn mission-start-btn" onClick={startGame}>
+                <Play size={16} strokeWidth={1.5} />
+                <span>Start Mission</span>
               </button>
-              <button onClick={cycleSkin} className="secondary-btn">
+              <button onClick={cycleSkin} className="secondary-btn ship-color-btn">
                 <span className="skin-dot" style={{ backgroundColor: playerSkin }}></span>
-                Change Ship Color
+                <span>Change Ship Color</span>
               </button>
               <p className="controls-hint">Tap or Space to Jump</p>
             </motion.div>

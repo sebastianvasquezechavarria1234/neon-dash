@@ -177,6 +177,68 @@ canvas {
   animation: button-glitch 0.3s infinite;
 }
 
+.mission-start-btn {
+  background: transparent !important;
+  color: #00f2ff !important;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500 !important;
+  text-transform: none;
+  letter-spacing: 0.1em;
+  padding: 0.8rem 2.5rem !important;
+  font-size: 0.9rem !important;
+  border: 1px solid #00f2ff !important;
+  border-radius: 0 !important;
+  transform: skew(-15deg);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: visible;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.mission-start-btn span {
+  display: inline-block;
+  transform: skew(15deg);
+}
+
+.mission-start-btn:hover {
+  background: #00f2ff !important;
+  color: #000 !important;
+  transform: skew(-15deg) scale(1.05);
+  box-shadow: none !important;
+  animation: button-glitch 0.3s infinite;
+}
+
+.ship-color-btn {
+  background: transparent !important;
+  color: #fff !important;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500 !important;
+  text-transform: none;
+  letter-spacing: 0.1em;
+  padding: 0.8rem 2.5rem !important;
+  font-size: 0.9rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 0 !important;
+  transform: skew(-15deg);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: visible;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.ship-color-btn span {
+  display: inline-block;
+  transform: skew(15deg);
+}
+
+.ship-color-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: #fff !important;
+  transform: skew(-15deg) scale(1.05);
+}
+
 .primary-btn {
   background: #00f2ff;
   color: #000;
