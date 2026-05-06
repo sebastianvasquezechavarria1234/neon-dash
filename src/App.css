@@ -1,0 +1,137 @@
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  user-select: none;
+  cursor: crosshair;
+}
+
+.title-neon {
+  font-size: 4rem;
+  margin: 0;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.1em;
+  font-family: 'Outfit', sans-serif;
+  -webkit-text-stroke: 1px rgba(0, 242, 255, 0.5);
+}
+
+.stats-container {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #fff;
+}
+
+.icon-pulse {
+  color: #00f2ff;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.canvas-wrapper {
+  position: relative;
+  line-height: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #050505;
+}
+
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  gap: 1.5rem;
+}
+
+.overlay h2 {
+  font-size: 3rem;
+  color: #ff0055;
+  margin: 0;
+  font-weight: 800;
+  text-shadow: 0 0 20px rgba(255, 0, 85, 0.5);
+}
+
+.primary-btn {
+  background: #00f2ff;
+  color: #000;
+  border: none;
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+}
+
+.primary-btn:hover {
+  background: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+}
+
+.retry-btn {
+  background: #ff0055;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
+}
+
+.retry-btn:hover {
+  background: #ff3377;
+  box-shadow: 0 0 30px rgba(255, 0, 85, 0.6);
+}
+
+.controls-hint {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.final-score {
+  font-size: 1.5rem;
+  color: #fff;
+  margin: 0;
+}
+
+.footer-text {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.3em;
+  font-weight: 400;
+}
+
+@media (max-width: 600px) {
+  .title-neon { font-size: 2.5rem; }
+  .canvas-wrapper { width: 95vw; }
+}
