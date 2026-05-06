@@ -105,6 +105,25 @@ function App() {
     }
   };
 
+  const [playerSkin, setPlayerSkin] = useState(() => localStorage.getItem('neon-dash-skin') || '#00f2ff');
+
+  const skins = [
+    { name: 'Cyan', color: '#00f2ff' },
+    { name: 'Crimson', color: '#ff0055' },
+    { name: 'Gold', color: '#ffaa00' },
+    { name: 'Emerald', color: '#00ff44' },
+    { name: 'Amethyst', color: '#a200ff' }
+  ];
+
+  const cycleSkin = (e) => {
+    e.stopPropagation();
+    const currentIndex = skins.findIndex(s => s.color === playerSkin);
+    const nextIndex = (currentIndex + 1) % skins.length;
+    const newSkin = skins[nextIndex].color;
+    setPlayerSkin(newSkin);
+    localStorage.setItem('neon-dash-skin', newSkin);
+  };
+
   const startGame = () => {
     if (!audioEnabled) {
       setAudioEnabled(true);
@@ -114,7 +133,7 @@ function App() {
     setGameState('playing');
     setIsPaused(false);
     gameRef.current = {
-      player: { x: 80, y: 200, vy: 0, size: 30, color: '#00f2ff', shield: false },
+      player: { x: 80, y: 200, vy: 0, size: 30, color: playerSkin, shield: false },
       obstacles: [],
       powerups: [],
       particles: [],
@@ -130,11 +149,12 @@ function App() {
     };
   };
 
+
   const handleAction = () => {
     if (gameState === 'playing' && !isPaused) {
       gameRef.current.player.vy = JUMP_FORCE;
       playSound('jump');
-      const pColor = gameRef.current.player.shield ? '#fff' : '#00f2ff';
+      const pColor = gameRef.current.player.shield ? '#fff' : playerSkin;
       createParticles(gameRef.current.player.x, gameRef.current.player.y + 15, pColor, 8);
     } else if (gameState === 'idle' || gameState === 'gameOver') {
       startGame();
@@ -483,6 +503,10 @@ function App() {
               <button className="primary-btn neon-border">
                 <Play size={24} />
                 Start Mission
+              </button>
+              <button onClick={cycleSkin} className="secondary-btn">
+                <span className="skin-dot" style={{ backgroundColor: playerSkin }}></span>
+                Change Ship Color
               </button>
               <p className="controls-hint">Tap or Space to Jump</p>
             </motion.div>
