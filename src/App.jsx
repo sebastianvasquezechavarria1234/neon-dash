@@ -26,6 +26,28 @@ function App() {
     shake: 0
   });
 
+  const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const container = canvasRef.current?.parentElement;
+      if (!container) return;
+      
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      // Maintain 2:1 ratio
+      if (width / 2 > height) {
+        setDimensions({ width: height * 2, height: height });
+      } else {
+        setDimensions({ width: width, height: width / 2 });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const startGame = () => {
     setScore(0);
     setGameState('playing');
@@ -87,8 +109,6 @@ function App() {
     const drawPlayer = (ctx, p) => {
       ctx.save();
       
-      // Calculate squash and stretch based on velocity
-      // Stretching when moving fast (jumping/falling), squashing when hitting floor
       const stretch = Math.min(0.3, Math.abs(p.vy) * 0.02);
       const scaleX = 1 - stretch;
       const scaleY = 1 + stretch;
@@ -97,11 +117,10 @@ function App() {
       ctx.rotate(p.vy * 0.05);
       ctx.scale(scaleX, scaleY);
       
-      // Motion Trail (Ghosting effect)
       ctx.globalAlpha = 0.3;
       for(let i = 1; i <= 3; i++) {
         ctx.save();
-        ctx.translate(-p.vy * i * 0.5, 0); // Trail follows velocity
+        ctx.translate(-p.vy * i * 0.5, 0);
         ctx.beginPath();
         ctx.moveTo(p.size / 2, 0);
         ctx.lineTo(-p.size / 2, -p.size / 2);
@@ -113,11 +132,9 @@ function App() {
       }
       ctx.globalAlpha = 1.0;
 
-      // Glow
       ctx.shadowBlur = 20 + Math.abs(p.vy);
       ctx.shadowColor = p.color;
       
-      // Main Body
       ctx.fillStyle = p.color;
       ctx.beginPath();
       ctx.moveTo(p.size / 2, 0);
@@ -127,7 +144,6 @@ function App() {
       ctx.closePath();
       ctx.fill();
 
-      // Inner Core
       ctx.fillStyle = '#fff';
       ctx.beginPath();
       ctx.moveTo(p.size / 4, 0);
@@ -140,20 +156,18 @@ function App() {
       ctx.restore();
     };
 
-
     const drawObstacle = (ctx, obs) => {
       ctx.save();
       ctx.shadowBlur = 15;
       ctx.shadowColor = obs.color;
       ctx.fillStyle = obs.color;
       
-      // Draw as a crystal spike
       ctx.beginPath();
-      if (obs.y === 0) { // Top obstacle
+      if (obs.y === 0) {
         ctx.moveTo(obs.x, 0);
         ctx.lineTo(obs.x + obs.w, 0);
         ctx.lineTo(obs.x + obs.w / 2, obs.h);
-      } else { // Bottom obstacle
+      } else {
         ctx.moveTo(obs.x, CANVAS_HEIGHT);
         ctx.lineTo(obs.x + obs.w, CANVAS_HEIGHT);
         ctx.lineTo(obs.x + obs.w / 2, CANVAS_HEIGHT - obs.h);
@@ -161,7 +175,6 @@ function App() {
       ctx.closePath();
       ctx.fill();
 
-      // Inner detail line
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -183,7 +196,6 @@ function App() {
       if (!isPaused) {
         g.frame++;
 
-        // --- UPDATE ---
         g.player.vy += GRAVITY;
         g.player.y += g.player.vy;
 
@@ -211,7 +223,6 @@ function App() {
         g.obstacles.forEach((obs) => {
           obs.x -= g.speed + (score * 0.05);
           
-          // Collision detection (Approximated for triangle)
           if (
             g.player.x < obs.x + obs.w &&
             g.player.x + g.player.size > obs.x &&
@@ -240,7 +251,6 @@ function App() {
         if (g.shake > 0) g.shake *= 0.9;
       }
 
-      // --- DRAW ---
       ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       
       if (g.shake > 0) {
@@ -248,7 +258,6 @@ function App() {
         ctx.translate((Math.random() - 0.5) * g.shake, (Math.random() - 0.5) * g.shake);
       }
 
-      // Enhanced Grid
       ctx.strokeStyle = 'rgba(0, 242, 255, 0.08)';
       ctx.lineWidth = 1;
       for(let i=0; i<CANVAS_WIDTH + 100; i+=50) {
@@ -265,7 +274,6 @@ function App() {
         ctx.stroke();
       }
 
-      // Draw Particles
       g.particles.forEach(p => {
         ctx.globalAlpha = p.life;
         ctx.fillStyle = p.color;
@@ -273,13 +281,10 @@ function App() {
       });
       ctx.globalAlpha = 1;
 
-      // Draw Obstacles
       g.obstacles.forEach(obs => drawObstacle(ctx, obs));
 
-      // Draw Player
       drawPlayer(ctx, g.player);
 
-      // Draw Floor Border
       ctx.strokeStyle = 'rgba(0, 242, 255, 0.5)';
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -336,11 +341,11 @@ function App() {
       </header>
 
       <main className="canvas-wrapper">
-
         <canvas 
           ref={canvasRef} 
           width={CANVAS_WIDTH} 
           height={CANVAS_HEIGHT}
+          style={{ width: dimensions.width, height: dimensions.height }}
         />
         
         <AnimatePresence>
