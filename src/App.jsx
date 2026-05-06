@@ -57,6 +57,12 @@ function App() {
       obstacles: [],
       powerups: [],
       particles: [],
+      stars: Array.from({ length: 50 }, () => ({
+        x: Math.random() * CANVAS_WIDTH,
+        y: Math.random() * CANVAS_HEIGHT,
+        size: Math.random() * 2,
+        speed: 0.5 + Math.random() * 1.5
+      })),
       frame: 0,
       speed: OBSTACLE_SPEED,
       shake: 0
@@ -109,10 +115,10 @@ function App() {
     let animationId;
 
     const getDifficultyColor = (score) => {
-      if (score < 10) return '#ff0055'; // Red
-      if (score < 25) return '#ffaa00'; // Orange
-      if (score < 50) return '#a200ff'; // Purple
-      return '#00ff44'; // Green
+      if (score < 10) return '#ff0055';
+      if (score < 25) return '#ffaa00';
+      if (score < 50) return '#a200ff';
+      return '#00ff44';
     };
 
     const drawPlayer = (ctx, p) => {
@@ -152,7 +158,7 @@ function App() {
       }
       ctx.globalAlpha = 1.0;
 
-      ctx.shadowBlur = 20 + Math.abs(p.vy);
+      ctx.shadowBlur = 25;
       ctx.shadowColor = p.color;
       ctx.fillStyle = p.color;
       ctx.beginPath();
@@ -192,7 +198,12 @@ function App() {
           g.player.vy = 0;
         }
 
-        // Spawn Powerups
+        // Parallax Stars
+        g.stars.forEach(s => {
+          s.x -= s.speed;
+          if (s.x < 0) s.x = CANVAS_WIDTH;
+        });
+
         if (g.frame % 800 === 0) {
           g.powerups.push({
             x: CANVAS_WIDTH,
@@ -272,8 +283,14 @@ function App() {
         ctx.translate((Math.random() - 0.5) * g.shake, (Math.random() - 0.5) * g.shake);
       }
 
+      // Draw Stars
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      g.stars.forEach(s => {
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
+      });
+
       // Grid Color Shift
-      ctx.strokeStyle = score > 25 ? 'rgba(162, 0, 255, 0.08)' : 'rgba(0, 242, 255, 0.08)';
+      ctx.strokeStyle = score > 25 ? 'rgba(162, 0, 255, 0.12)' : 'rgba(0, 242, 255, 0.12)';
       ctx.lineWidth = 1;
       for(let i=0; i<CANVAS_WIDTH + 100; i+=50) {
         const offset = (g.frame * (isPaused ? 0 : 2)) % 50;
@@ -285,7 +302,7 @@ function App() {
 
       g.powerups.forEach(pu => {
         ctx.save();
-        ctx.shadowBlur = 15; ctx.shadowColor = '#fff';
+        ctx.shadowBlur = 20; ctx.shadowColor = '#fff';
         ctx.fillStyle = '#fff';
         ctx.beginPath(); ctx.arc(pu.x + pu.size/2, pu.y + pu.size/2, pu.size/2, 0, Math.PI*2); ctx.fill();
         ctx.restore();
@@ -293,13 +310,13 @@ function App() {
 
       g.obstacles.forEach(obs => {
         ctx.save();
-        ctx.shadowBlur = 15; ctx.shadowColor = obs.color;
+        ctx.shadowBlur = 20; ctx.shadowColor = obs.color;
         ctx.fillStyle = obs.color;
         ctx.beginPath();
         if (obs.y === 0) { ctx.moveTo(obs.x, 0); ctx.lineTo(obs.x + obs.w, 0); ctx.lineTo(obs.x + obs.w / 2, obs.h); }
         else { ctx.moveTo(obs.x, CANVAS_HEIGHT); ctx.lineTo(obs.x + obs.w, CANVAS_HEIGHT); ctx.lineTo(obs.x + obs.w / 2, CANVAS_HEIGHT - obs.h); }
         ctx.closePath(); ctx.fill();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)'; ctx.lineWidth = 2;
         ctx.beginPath();
         if (obs.y === 0) { ctx.moveTo(obs.x + obs.w / 2, 0); ctx.lineTo(obs.x + obs.w / 2, obs.h * 0.8); }
         else { ctx.moveTo(obs.x + obs.w / 2, CANVAS_HEIGHT); ctx.lineTo(obs.x + obs.w / 2, CANVAS_HEIGHT - obs.h * 0.8); }
@@ -309,8 +326,8 @@ function App() {
 
       drawPlayer(ctx, g.player);
 
-      ctx.strokeStyle = score > 25 ? 'rgba(162, 0, 255, 0.5)' : 'rgba(0, 242, 255, 0.5)';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = score > 25 ? 'rgba(162, 0, 255, 0.6)' : 'rgba(0, 242, 255, 0.6)';
+      ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(0, CANVAS_HEIGHT); ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT); ctx.stroke();
 
       if (g.shake > 0) ctx.restore();
