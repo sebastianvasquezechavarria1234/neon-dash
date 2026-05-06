@@ -129,7 +129,7 @@ canvas {
   font-weight: 400;
   text-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
   font-family: 'Orbitron', sans-serif;
-  letter-spacing: 0.2em;
+  letter-spacing: 0;
 }
 
 .pause-title {
