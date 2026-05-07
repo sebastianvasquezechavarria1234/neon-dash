@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, RotateCcw, Trophy, Zap, Pause, PlayCircle } from 'lucide-react'
+import { Play, RotateCcw, Trophy, Zap, Pause, PlayCircle, ShoppingCart, Coins, ShieldCheck, Sparkles } from 'lucide-react'
 import './App.css'
 
 const CANVAS_WIDTH = 800;
@@ -21,11 +21,17 @@ function App() {
   const gameRef = useRef({
     player: { x: 50, y: 200, vy: 0, size: 30, color: '#00f2ff' },
     obstacles: [],
+    coins: [],
     particles: [],
     frame: 0,
     speed: OBSTACLE_SPEED,
     shake: 0
   });
+
+  const [coins, setCoins] = useState(() => parseInt(localStorage.getItem('neon-dash-coins') || '0'));
+  const [unlockedSkins, setUnlockedSkins] = useState(() => JSON.parse(localStorage.getItem('neon-dash-unlocked') || '["#00f2ff"]'));
+  const [shopOpen, setShopOpen] = useState(false);
+  const [upgrades, setUpgrades] = useState(() => JSON.parse(localStorage.getItem('neon-dash-upgrades') || '{"autoShield": false}'));
 
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
 
@@ -118,12 +124,43 @@ function App() {
   const [playerSkin, setPlayerSkin] = useState(() => localStorage.getItem('neon-dash-skin') || '#00f2ff');
 
   const skins = [
-    { name: 'Cyan', color: '#00f2ff' },
-    { name: 'Crimson', color: '#ff0055' },
-    { name: 'Gold', color: '#ffaa00' },
-    { name: 'Emerald', color: '#00ff44' },
-    { name: 'Amethyst', color: '#a200ff' }
+    { name: 'Base', color: '#888888', price: 0, rarity: 'Common' },
+    { name: 'Recruit', color: '#00ff44', price: 100, rarity: 'Uncommon' },
+    { name: 'Pilot', color: '#0088ff', price: 250, rarity: 'Rare' },
+    { name: 'Veteran', color: '#a200ff', price: 600, rarity: 'Epic' },
+    { name: 'Elite', color: '#ffaa00', price: 1200, rarity: 'Legendary' },
+    { name: 'Legend', color: '#ff0055', price: 2500, rarity: 'Mythic' },
+    { name: 'Shadow', color: '#111111', price: 5000, rarity: 'Ultimate' },
+    { name: 'God', color: 'rainbow', price: 10000, rarity: 'Divine' }
   ];
+
+  const buySkin = (skin) => {
+    if (coins >= skin.price && !unlockedSkins.includes(skin.color)) {
+      const newCoins = coins - skin.price;
+      const newUnlocked = [...unlockedSkins, skin.color];
+      setCoins(newCoins);
+      setUnlockedSkins(newUnlocked);
+      localStorage.setItem('neon-dash-coins', newCoins.toString());
+      localStorage.setItem('neon-dash-unlocked', JSON.stringify(newUnlocked));
+      setPlayerSkin(skin.color);
+      localStorage.setItem('neon-dash-skin', skin.color);
+      speak(`New system unlocked: ${skin.name}`);
+      playSound('powerup');
+    }
+  };
+
+  const buyUpgrade = (type, price) => {
+    if (coins >= price && !upgrades[type]) {
+      const newCoins = coins - price;
+      const newUpgrades = { ...upgrades, [type]: true };
+      setCoins(newCoins);
+      setUpgrades(newUpgrades);
+      localStorage.setItem('neon-dash-coins', newCoins.toString());
+      localStorage.setItem('neon-dash-upgrades', JSON.stringify(newUpgrades));
+      speak("System upgrade integrated.");
+      playSound('powerup');
+    }
+  };
 
   const cycleSkin = (e) => {
     e.stopPropagation();
@@ -144,9 +181,19 @@ function App() {
     setGameState('playing');
     setIsPaused(false);
     gameRef.current = {
-      player: { x: 80, y: 200, vy: 0, size: 30, color: playerSkin, shield: false, jumps: 0, trail: [] },
+      player: { 
+        x: 80, 
+        y: 200, 
+        vy: 0, 
+        size: 30, 
+        color: playerSkin, 
+        shield: upgrades.autoShield, 
+        jumps: 0, 
+        trail: [] 
+      },
       obstacles: [],
       powerups: [],
+      coins: [],
       particles: [],
       zones: [],
       buildings: Array.from({ length: 15 }, (_, i) => ({
@@ -263,8 +310,19 @@ function App() {
       ctx.globalAlpha = 1.0;
 
       ctx.shadowBlur = 25;
-      ctx.shadowColor = p.color;
-      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color === 'rainbow' ? '#fff' : p.color;
+      
+      if (p.color === 'rainbow') {
+        const gradient = ctx.createLinearGradient(-p.size/2, 0, p.size/2, 0);
+        const t = Date.now() * 0.005;
+        gradient.addColorStop(0, `hsl(${t * 50 % 360}, 100%, 50%)`);
+        gradient.addColorStop(0.5, `hsl(${(t * 50 + 120) % 360}, 100%, 50%)`);
+        gradient.addColorStop(1, `hsl(${(t * 50 + 240) % 360}, 100%, 50%)`);
+        ctx.fillStyle = gradient;
+      } else {
+        ctx.fillStyle = p.color;
+      }
+      
       ctx.beginPath();
       ctx.moveTo(p.size / 2, 0);
       ctx.lineTo(-p.size / 2, -p.size / 2);
@@ -390,6 +448,27 @@ function App() {
           }
         });
 
+        g.coins.forEach((c, index) => {
+          c.x -= effectiveSpeed;
+          if (
+            !c.collected &&
+            g.player.x < c.x + c.size &&
+            g.player.x + g.player.size > c.x &&
+            g.player.y < c.y + c.size &&
+            g.player.y + g.player.size > c.y
+          ) {
+            c.collected = true;
+            setCoins(prev => {
+              const next = prev + 1;
+              localStorage.setItem('neon-dash-coins', next.toString());
+              return next;
+            });
+            playSound('powerup');
+            g.coins.splice(index, 1);
+            createParticles(c.x, c.y, '#ffd700', 8);
+          }
+        });
+
         g.obstacles.forEach((obs, index) => {
           obs.x -= effectiveSpeed;
           if (obs.vy !== 0) {
@@ -401,7 +480,13 @@ function App() {
           const dist = Math.hypot(g.player.x - obs.x, g.player.y - obs.y);
           if (dist < 60 && !obs.closeCall && !obs.passed) {
             obs.closeCall = true;
-            setScore(s => s + 2); // Double points for risk
+            const points = 2;
+            setScore(s => s + points);
+            setCoins(c => {
+              const next = c + points;
+              localStorage.setItem('neon-dash-coins', next.toString());
+              return next;
+            });
             createParticles(g.player.x, g.player.y, '#ffaa00', 5);
           }
 
@@ -429,6 +514,11 @@ function App() {
           if (obs.x + obs.w < g.player.x && !obs.passed) {
             obs.passed = true;
             setScore(s => s + 1);
+            setCoins(c => {
+              const next = c + 1;
+              localStorage.setItem('neon-dash-coins', next.toString());
+              return next;
+            });
           }
         });
 
@@ -551,8 +641,14 @@ function App() {
         const alpha = (g.player.trail.length - i) / (g.player.trail.length * 2);
         ctx.globalAlpha = alpha;
         ctx.shadowBlur = 10;
-        ctx.shadowColor = g.player.color;
-        ctx.fillStyle = g.player.color;
+        ctx.shadowColor = g.player.color === 'rainbow' ? '#fff' : g.player.color;
+        
+        if (g.player.color === 'rainbow') {
+          const t = Date.now() * 0.005 - i * 0.1;
+          ctx.fillStyle = `hsl(${t * 50 % 360}, 100%, 50%)`;
+        } else {
+          ctx.fillStyle = g.player.color;
+        }
         ctx.save();
         ctx.translate(pos.x + g.player.size / 2, pos.y + g.player.size / 2);
         const scale = 0.9 - (i * 0.05);
@@ -623,6 +719,10 @@ function App() {
               <Trophy size={16} />
               <span>Best: {highScore}</span>
             </div>
+            <div className="stat-item coin-stat">
+              <Coins size={16} color="#ffd700" />
+              <span>{coins}</span>
+            </div>
             <div className="difficulty-progress">
               <span className="progress-label">Difficulty</span>
               <div className="progress-track">
@@ -663,11 +763,94 @@ function App() {
                 <Play size={16} strokeWidth={1.5} />
                 <span>Start Mission</span>
               </button>
-              <button onClick={cycleSkin} className="secondary-btn ship-color-btn">
-                <span className="skin-dot" style={{ backgroundColor: playerSkin }}></span>
-                <span>Change Ship Color</span>
-              </button>
+              
+              <div className="menu-row">
+                <button onClick={cycleSkin} className="secondary-btn ship-color-btn">
+                  <span className="skin-dot" style={{ backgroundColor: playerSkin }}></span>
+                  <span>Change Ship</span>
+                </button>
+                <button onClick={() => setShopOpen(true)} className="secondary-btn shop-btn">
+                  <ShoppingCart size={16} />
+                  <span>The Vault</span>
+                </button>
+              </div>
+              
               <p className="controls-hint">Tap or Space to Jump</p>
+            </motion.div>
+          )}
+
+          {shopOpen && (
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: 50 }}
+              className="overlay shop-overlay"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="shop-header">
+                <h2 className="shop-title">NEON VAULT</h2>
+                <div className="shop-coins">
+                  <Coins size={20} color="#ffd700" />
+                  <span>{coins} NEON SHARDS</span>
+                </div>
+              </div>
+
+              <div className="shop-content">
+                <div className="shop-section">
+                  <h3>SYSTEM SKINS</h3>
+                  <div className="skins-grid">
+                    {skins.map(skin => (
+                      <div 
+                        key={skin.name} 
+                        className={`skin-card rarity-${skin.rarity.toLowerCase()} ${playerSkin === skin.color ? 'active' : ''} ${!unlockedSkins.includes(skin.color) ? 'locked' : ''}`}
+                        onClick={() => unlockedSkins.includes(skin.color) ? setPlayerSkin(skin.color) : buySkin(skin)}
+                      >
+                        <div className={`skin-preview ${skin.color === 'rainbow' ? 'rainbow-effect' : ''}`} style={{ backgroundColor: skin.color === 'rainbow' ? 'transparent' : skin.color }}></div>
+                        <div className="skin-info">
+                          <span className="skin-name">{skin.name}</span>
+                          <span className="skin-rarity">{skin.rarity}</span>
+                        </div>
+                        {!unlockedSkins.includes(skin.color) ? (
+                          <div className="price-tag">
+                            <Coins size={12} />
+                            <span>{skin.price}</span>
+                          </div>
+                        ) : (
+                          <span className="owned-tag">OWNED</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="shop-section">
+                  <h3>HARDWARE UPGRADES</h3>
+                  <div className="upgrades-grid">
+                    <div 
+                      className={`upgrade-card ${upgrades.autoShield ? 'maxed' : ''}`}
+                      onClick={() => !upgrades.autoShield && buyUpgrade('autoShield', 1500)}
+                    >
+                      <ShieldCheck size={24} className="upgrade-icon" />
+                      <div className="upgrade-info">
+                        <span className="upgrade-name">Auto-Shield</span>
+                        <span className="upgrade-desc">Start mission with shield active</span>
+                      </div>
+                      {!upgrades.autoShield ? (
+                        <div className="price-tag">
+                          <Coins size={12} />
+                          <span>1500</span>
+                        </div>
+                      ) : (
+                        <span className="owned-tag">INSTALLED</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button className="primary-btn close-shop-btn" onClick={() => setShopOpen(false)}>
+                <span>Return to Hangar</span>
+              </button>
             </motion.div>
           )}
 
