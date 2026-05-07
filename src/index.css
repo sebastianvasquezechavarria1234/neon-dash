@@ -14,33 +14,10 @@ html, body, #root {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-}
-
-body {
-  background-color: #000;
-}
-
-.google-sans-flex-main {
-  font-family: "Google Sans Flex", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 500;
-  font-style: normal;
-  font-variation-settings:
-    "slnt" 0,
-    "wdth" 100,
-    "GRAD" 0,
-    "ROND" 0;
-}
-
-
-body {
-  margin: 0;
+  background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0c 100%);
   display: flex;
   place-items: center;
-  width: 100vw;
-  height: 100vh;
-  background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0c 100%);
-  overflow: hidden;
+  justify-content: center;
 }
 
 #root {
@@ -68,8 +45,8 @@ body {
 }
 
 button {
-  border-radius: 12px;
-  border: 1px solid transparent;
+  border-radius: 0;
+  border: 2px solid rgba(255, 255, 255, 0.2);
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
