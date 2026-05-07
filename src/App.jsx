@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, RotateCcw, Trophy, Zap, Pause, PlayCircle, ShoppingCart, Coins, ShieldCheck, Sparkles, Home } from 'lucide-react'
+import { Play, RotateCcw, Trophy, Zap, Pause, PlayCircle, ShoppingCart, Coins, ShieldCheck, Sparkles, Home, User, Save } from 'lucide-react'
 import RainbowCrystal from './RainbowCrystal'
 import './App.css'
 
@@ -37,6 +37,8 @@ function App() {
   const [shopTab, setShopTab] = useState('skins'); // skins, chassis, upgrades
 
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
+  const [playerName, setPlayerName] = useState(() => localStorage.getItem('neon-dash-playername') || 'PILOT_01');
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     if (gameState === 'idle') {
@@ -257,6 +259,11 @@ function App() {
     setGameState('idle');
     setIsPaused(false);
     speak("Returning to hangar.");
+  };
+
+  const updatePlayerName = (name) => {
+    setPlayerName(name);
+    localStorage.setItem('neon-dash-playername', name);
   };
 
   const createParticles = (x, y, color, count) => {
@@ -816,32 +823,51 @@ function App() {
               exit={{ opacity: 0 }}
               className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md gap-8 z-40"
             >
-              <button 
-                className="group relative px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-cyan border border-neon-cyan -skew-x-12 transition-all hover:bg-neon-cyan hover:text-black hover:scale-105 active:scale-95"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  startGame();
-                }}
-              >
-                <div className="flex items-center gap-3 skew-x-12">
-                  <Play size={16} strokeWidth={1.5} />
-                  <span>START MISSION</span>
-                </div>
-              </button>
-              
-              <div className="flex gap-4">
+              <div className="flex flex-col items-center gap-2 mb-4">
+                <span className="text-[10px] text-neon-cyan tracking-[0.4em] uppercase opacity-50">Welcome Back</span>
+                <h2 className="text-4xl font-light tracking-[0.2em] text-white">{playerName}</h2>
+              </div>
+
+              <div className="flex flex-col gap-4 w-64">
                 <button 
+                  className="group relative px-10 py-4 text-sm font-medium tracking-[0.2em] text-white border-2 border-white transition-all hover:bg-white hover:text-black hover:scale-105 active:scale-95"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShopOpen(true);
-                  }} 
-                  className="px-8 py-3 text-sm font-medium tracking-[0.1em] text-neon-cyan border border-neon-cyan/30 -skew-x-12 transition-all hover:bg-neon-cyan/10 hover:border-neon-cyan"
+                    startGame();
+                  }}
                 >
-                  <div className="flex items-center gap-3 skew-x-12">
-                    <ShoppingCart size={16} />
-                    <span>THE VAULT</span>
+                  <div className="flex items-center justify-center gap-3">
+                    <Play size={18} fill="currentColor" />
+                    <span>START MISSION</span>
                   </div>
                 </button>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShopOpen(true);
+                    }} 
+                    className="px-4 py-3 text-[10px] font-medium tracking-[0.2em] text-white border-2 border-white transition-all hover:bg-white/10"
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <ShoppingCart size={16} />
+                      <span>VAULT</span>
+                    </div>
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowProfile(true);
+                    }} 
+                    className="px-4 py-3 text-[10px] font-medium tracking-[0.2em] text-white border-2 border-white transition-all hover:bg-white/10"
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <User size={16} />
+                      <span>PILOT</span>
+                    </div>
+                  </button>
+                </div>
               </div>
               
               <p className="mt-4 text-[10px] text-white/50 tracking-wider">TAP OR SPACE TO JUMP</p>
@@ -1088,6 +1114,56 @@ function App() {
                     <Home size={20} />
                     <span>MENU</span>
                   </div>
+                </button>
+              </div>
+            </motion.div>
+          )}
+          {showProfile && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 backdrop-blur-xl z-[80]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-full max-w-md p-8 border-2 border-white flex flex-col gap-8">
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-2xl font-light tracking-[0.3em] text-white uppercase text-center">Pilot Registry</h2>
+                  <p className="text-[10px] text-white/30 text-center uppercase tracking-widest">Identify yourself to the system</p>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50" size={20} />
+                    <input 
+                      type="text" 
+                      value={playerName}
+                      onChange={(e) => updatePlayerName(e.target.value)}
+                      placeholder="ENTER CALLSIGN"
+                      className="w-full bg-white/5 border-2 border-white/20 px-12 py-4 text-white font-orbitron text-sm tracking-widest focus:border-white focus:outline-none transition-all"
+                      maxLength={15}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-2 gap-4 text-[10px] text-white/50 uppercase tracking-widest bg-white/5 p-4 border border-white/10">
+                    <div className="flex flex-col gap-1">
+                      <span>Status</span>
+                      <span className="text-neon-cyan">ACTIVE</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span>Credits</span>
+                      <span className="text-neon-gold">{coins}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setShowProfile(false)}
+                  className="w-full py-4 text-sm font-medium tracking-[0.2em] bg-white text-black hover:bg-neon-cyan transition-all uppercase"
+                >
+                  Confirm Registry
                 </button>
               </div>
             </motion.div>
