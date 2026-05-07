@@ -697,46 +697,45 @@ function App() {
   }, [gameState, score, highScore]);
 
   return (
-    <div className="relative flex flex-col items-center justify-start w-screen h-screen overflow-hidden select-none cursor-crosshair bg-[radial-gradient(circle_at_center,_#0a0a1a_0%,_#000_70%)]" onClick={handleAction}>
-      <header className="relative z-50 flex items-center justify-between w-full px-8 py-3 bg-black/40 backdrop-blur-md border-b border-cyan-500/10">
-        <div className="flex items-center">
+    <div className="relative flex flex-col items-center w-screen h-screen overflow-hidden select-none cursor-crosshair bg-[radial-gradient(circle_at_center,#0a0a1a_0%,#000_70%)] font-orbitron" onClick={handleAction}>
+      <header className="relative z-50 flex items-center justify-between w-full px-8 py-3 bg-black/40 backdrop-blur-md border-b border-neon-cyan/20 shrink-0">
+        <div className="header-left">
           <motion.h1 
             animate={{ textShadow: ["0 0 10px #00f2ff", "0 0 20px #00f2ff", "0 0 10px #00f2ff"] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="m-0 text-2xl font-bold tracking-tighter text-cyan-400 font-orbitron"
+            className="m-0 text-xl font-semibold tracking-wider text-neon-cyan drop-shadow-[0_0_12px_rgba(0,242,255,0.5)]"
           >
             Neon Dash
           </motion.h1>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4 text-white font-medium">
-            <div className="flex items-center gap-2">
-              <Zap size={16} className="text-cyan-400 animate-pulse" />
-              <span className="text-sm">Score: {score}</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-2 text-sm text-white">
+              <Zap size={16} className="text-neon-cyan animate-pulse" />
+              <span>Score: {score}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Trophy size={16} className="text-yellow-500" />
-              <span className="text-sm">Best: {highScore}</span>
+            <div className="flex items-center gap-2 px-3 py-2 text-sm text-white">
+              <Trophy size={16} className="text-neon-gold" />
+              <span>Best: {highScore}</span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1 rounded bg-yellow-400/10 border border-yellow-400/20">
-              <Coins size={16} className="text-yellow-400" />
-              <span className="text-sm text-yellow-400 font-orbitron">{coins}</span>
+            <div className="flex items-center gap-2 px-3 py-1 text-sm text-neon-gold bg-neon-gold/10 rounded border border-neon-gold/20">
+              <Coins size={16} />
+              <span>{coins}</span>
             </div>
-            
-            <div className="hidden md:flex flex-col gap-1 w-24">
-              <span className="text-[8px] uppercase tracking-widest text-white/30 font-orbitron">Difficulty</span>
-              <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="flex flex-col gap-1 w-24">
+              <span className="text-[7px] text-white/30 uppercase tracking-[0.2em]">Difficulty</span>
+              <div className="w-full h-0.5 bg-white/10 rounded-full overflow-hidden">
                 <motion.div 
-                  className="h-full bg-cyan-400 shadow-[0_0_10px_#00f2ff]"
+                  className="h-full bg-neon-cyan shadow-[0_0_10px_#00f2ff]"
                   animate={{ width: `${Math.min(100, (score / 50) * 100)}%` }}
+                  transition={{ type: "spring", stiffness: 50 }}
                 />
               </div>
             </div>
-
             {gameState === 'playing' && (
               <button 
-                className="p-2 transition-all hover:bg-white/10 hover:text-cyan-400 rounded-full"
+                className="p-2 text-white hover:text-neon-cyan hover:bg-white/10 transition-all rounded-full" 
                 onClick={togglePause}
               >
                 {isPaused ? <PlayCircle size={20} /> : <Pause size={20} />}
@@ -746,8 +745,8 @@ function App() {
         </div>
       </header>
 
-      <main className="relative flex-1 w-full flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none z-10 opacity-40 mix-blend-overlay bg-[linear-gradient(rgba(18,16,16,0)_50%,_rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[length:100%_3px,3px_100%] shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]"></div>
+      <main className="relative flex-1 flex justify-center items-center w-full overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none z-10 opacity-40 mix-blend-overlay bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[length:100%_3px,3px_100%] shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]"></div>
         <canvas 
           ref={canvasRef} 
           width={CANVAS_WIDTH} 
@@ -762,38 +761,40 @@ function App() {
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }}
-              className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-lg gap-8 z-40"
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md gap-8 z-40"
             >
-              <div className="flex flex-col items-center gap-2">
-                <h2 className="text-5xl font-bold tracking-[0.3em] text-white font-orbitron uppercase">System Standby</h2>
-                <p className="text-cyan-400/60 text-[10px] tracking-widest font-orbitron">READY FOR DEPLOYMENT</p>
-              </div>
-
-              <div className="flex flex-col gap-4 w-64">
-                <button 
-                  className="group relative flex items-center justify-center gap-3 py-4 bg-transparent border border-cyan-400 text-cyan-400 font-orbitron tracking-[0.2em] -skew-x-12 transition-all hover:bg-cyan-400 hover:text-black overflow-hidden"
-                  onClick={startGame}
-                >
-                  <div className="absolute inset-0 bg-cyan-400/20 translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
-                  <Play size={18} strokeWidth={2} className="skew-x-12" />
-                  <span className="skew-x-12">Start Mission</span>
-                </button>
-                
-                <div className="flex gap-3">
-                  <button 
-                    onClick={() => setShopOpen(true)}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 border border-white/10 bg-white/5 text-white text-[11px] font-orbitron tracking-widest -skew-x-12 hover:bg-white/10 transition-all"
-                  >
-                    <ShoppingCart size={14} className="skew-x-12" />
-                    <span className="skew-x-12 text-[10px]">The Vault</span>
-                  </button>
+              <button 
+                className="group relative px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-cyan border border-neon-cyan -skew-x-12 transition-all hover:bg-neon-cyan hover:text-black hover:scale-105 active:scale-95"
+                onClick={startGame}
+              >
+                <div className="flex items-center gap-3 skew-x-12">
+                  <Play size={16} strokeWidth={1.5} />
+                  <span>START MISSION</span>
                 </div>
+              </button>
+              
+              <div className="flex gap-4">
+                <button 
+                  onClick={cycleSkin} 
+                  className="px-8 py-3 text-sm font-medium tracking-[0.1em] text-white border border-white/30 -skew-x-12 transition-all hover:bg-white/10 hover:border-white"
+                >
+                  <div className="flex items-center gap-3 skew-x-12">
+                    <span className="w-3 h-3 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: playerSkin === 'rainbow' ? '#fff' : playerSkin }}></span>
+                    <span>CHANGE SHIP</span>
+                  </div>
+                </button>
+                <button 
+                  onClick={() => setShopOpen(true)} 
+                  className="px-8 py-3 text-sm font-medium tracking-[0.1em] text-neon-cyan border border-neon-cyan/30 -skew-x-12 transition-all hover:bg-neon-cyan/10 hover:border-neon-cyan"
+                >
+                  <div className="flex items-center gap-3 skew-x-12">
+                    <ShoppingCart size={16} />
+                    <span>THE VAULT</span>
+                  </div>
+                </button>
               </div>
               
-              <div className="flex flex-col items-center gap-1 opacity-40">
-                <p className="text-[9px] text-white tracking-[0.2em] font-orbitron uppercase">Controls</p>
-                <p className="text-[8px] text-white tracking-widest">TAP / SPACE TO JUMP</p>
-              </div>
+              <p className="mt-4 text-[10px] text-white/50 tracking-wider">TAP OR SPACE TO JUMP</p>
             </motion.div>
           )}
 
@@ -802,117 +803,101 @@ function App() {
               initial={{ opacity: 0, y: 50 }} 
               animate={{ opacity: 1, y: 0 }} 
               exit={{ opacity: 0, y: 50 }}
-              className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-3xl p-8"
+              className="absolute inset-0 flex flex-col items-center justify-center bg-[#05050f]/95 backdrop-blur-2xl p-8 z-[60]"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-full max-w-3xl flex justify-between items-center border-b border-cyan-500/20 pb-6 mb-8">
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-3xl font-black tracking-[0.2em] text-white font-orbitron">NEON VAULT</h2>
-                  <p className="text-[10px] text-cyan-400/50 tracking-[0.3em] font-orbitron uppercase">Authorized Access Only</p>
-                </div>
-                <div className="flex items-center gap-3 px-5 py-2 rounded-none bg-yellow-400/5 border border-yellow-400/20">
-                  <Coins size={20} className="text-yellow-400" />
-                  <span className="text-lg font-bold text-yellow-400 font-orbitron">{coins} <span className="text-[10px] opacity-60">SHARDS</span></span>
-                </div>
-              </div>
-
-              <div className="w-full max-w-3xl overflow-y-auto pr-4 custom-scrollbar flex flex-col gap-12 max-h-[60vh]">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <Sparkles size={16} className="text-cyan-400" />
-                    <h3 className="text-xs text-white/40 tracking-[0.4em] font-orbitron uppercase">Tactical Skins</h3>
-                    <div className="flex-1 h-[1px] bg-white/5"></div>
+              <div className="w-full max-w-2xl flex flex-col h-full overflow-hidden">
+                <div className="flex justify-between items-center border-b border-neon-cyan/20 pb-4 mb-8">
+                  <h2 className="text-3xl font-light tracking-[0.2em] text-white">NEON VAULT</h2>
+                  <div className="flex items-center gap-2 text-neon-gold font-orbitron text-sm">
+                    <Coins size={20} />
+                    <span>{coins} NEON SHARDS</span>
                   </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {skins.map(skin => (
-                      <div 
-                        key={skin.name} 
-                        className={`group relative p-5 flex flex-col items-center gap-4 cursor-pointer transition-all duration-500 border rounded-none overflow-hidden
-                          ${playerSkin === skin.color ? 'border-cyan-400 bg-cyan-400/10 ring-1 ring-cyan-400/50' : 'border-white/5 bg-white/2 hover:border-white/20 hover:bg-white/5'}
-                          ${!unlockedSkins.includes(skin.color) ? 'opacity-80 hover:opacity-100' : ''}
-                        `}
-                        onClick={() => unlockedSkins.includes(skin.color) ? setPlayerSkin(skin.color) : buySkin(skin)}
-                      >
-                        <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                           <div className="w-1 h-1 bg-white/20 rounded-full"></div>
-                        </div>
+                </div>
 
-                        {skin.color === 'rainbow' ? (
-                          <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                            <div className="absolute inset-0 rounded-sm opacity-50 blur-xl animate-rainbow-shimmer" 
-                                 style={{ background: 'linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000)', backgroundSize: '400% 400%' }}></div>
-                            <div className="relative w-full h-full rounded-sm animate-rainbow-shimmer shadow-2xl border border-white/20" 
-                                 style={{ background: 'linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000)', backgroundSize: '400% 400%' }}></div>
+                <div className="flex-1 overflow-y-auto pr-4 flex flex-col gap-10">
+                  <section>
+                    <h3 className="text-[10px] text-white/40 tracking-[0.3em] mb-6 uppercase">SYSTEM SKINS</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {skins.map(skin => (
+                        <div 
+                          key={skin.name} 
+                          className={`
+                            group relative p-4 flex flex-col items-center gap-3 cursor-pointer transition-all border
+                            ${playerSkin === skin.color ? 'border-neon-cyan shadow-[0_0_15px_rgba(0,242,255,0.2)]' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}
+                            ${!unlockedSkins.includes(skin.color) ? 'opacity-80' : ''}
+                            ${skin.rarity === 'Divine' ? 'border-transparent !bg-black/80' : ''}
+                          `}
+                          style={skin.rarity === 'Divine' ? {
+                            borderImage: 'linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000) 1'
+                          } : {}}
+                          onClick={() => unlockedSkins.includes(skin.color) ? setPlayerSkin(skin.color) : buySkin(skin)}
+                        >
+                          {skin.color === 'rainbow' ? (
+                            <div className="w-8 h-8 rounded shadow-[0_0_15px_rgba(255,255,255,0.4)] bg-[linear-gradient(45deg,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8,#ff0000)] bg-[length:400%_400%] animate-[rainbow-animation_3s_ease_infinite]"></div>
+                          ) : (
+                            <div className="w-8 h-8 rounded shadow-[0_0_15px_currentColor]" style={{ backgroundColor: skin.color }}></div>
+                          )}
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="text-[10px] text-white font-medium">{skin.name}</span>
+                            <span className={`text-[8px] uppercase tracking-wider ${
+                              skin.rarity === 'Common' ? 'text-gray-400' :
+                              skin.rarity === 'Uncommon' ? 'text-green-400' :
+                              skin.rarity === 'Rare' ? 'text-blue-400' :
+                              skin.rarity === 'Epic' ? 'text-purple-400' :
+                              skin.rarity === 'Legendary' ? 'text-yellow-400' :
+                              skin.rarity === 'Mythic' ? 'text-red-400' :
+                              skin.rarity === 'Ultimate' ? 'text-white shadow-[0_0_5px_white]' : 'text-transparent bg-clip-text bg-[linear-gradient(to_right,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8)] font-bold'
+                            }`}>{skin.rarity}</span>
                           </div>
-                        ) : (
-                          <div className="w-12 h-12 rounded-sm transition-transform duration-500 group-hover:scale-110" 
-                               style={{ backgroundColor: skin.color, boxShadow: `0 0 30px ${skin.color === '#111111' ? 'rgba(255,255,255,0.2)' : skin.color + '44'}` }}></div>
-                        )}
-                        
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-[11px] text-white font-orbitron tracking-wider">{skin.name}</span>
-                          <span className={`text-[7px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full border
-                            ${skin.rarity === 'Divine' ? 'border-pink-500/50 text-pink-400 bg-pink-500/10' : 
-                              skin.rarity === 'Ultimate' ? 'border-white/50 text-white bg-white/10' :
-                              skin.rarity === 'Mythic' ? 'border-red-500/50 text-red-400 bg-red-500/10' :
-                              'border-white/20 text-white/40'}
-                          `}>{skin.rarity}</span>
+                          {!unlockedSkins.includes(skin.color) ? (
+                            <div className="flex items-center gap-1.5 text-neon-gold text-xs">
+                              <Coins size={12} />
+                              <span>{skin.price}</span>
+                            </div>
+                          ) : (
+                            <span className="text-[8px] text-white/30">OWNED</span>
+                          )}
                         </div>
-
-                        {!unlockedSkins.includes(skin.color) ? (
-                          <div className="flex items-center gap-2 text-yellow-400 font-orbitron text-xs bg-yellow-400/5 px-3 py-1 rounded-full border border-yellow-400/10">
-                            <Coins size={12} />
-                            <span>{skin.price}</span>
-                          </div>
-                        ) : (
-                          <span className="text-[8px] text-cyan-400/60 font-orbitron uppercase tracking-widest">Authorized</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <ShieldCheck size={16} className="text-cyan-400" />
-                    <h3 className="text-xs text-white/40 tracking-[0.4em] font-orbitron uppercase">System Modules</h3>
-                    <div className="flex-1 h-[1px] bg-white/5"></div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div 
-                      className={`group relative p-5 flex items-center gap-6 cursor-pointer transition-all duration-300 border
-                        ${upgrades.autoShield ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-white/5 bg-white/2 hover:border-white/20'}
-                      `}
-                      onClick={() => !upgrades.autoShield && buyUpgrade('autoShield', 1500)}
-                    >
-                      <div className={`p-4 rounded-none border ${upgrades.autoShield ? 'border-emerald-500/40 text-emerald-400' : 'border-white/10 text-white/40'}`}>
-                        <ShieldCheck size={28} />
-                      </div>
-                      <div className="flex-1 flex flex-col gap-1">
-                        <span className="text-sm text-white font-orbitron tracking-widest uppercase">Auto-Shield Alpha</span>
-                        <span className="text-[10px] text-white/40">Inject defensive shield at mission launch</span>
-                      </div>
-                      {!upgrades.autoShield ? (
-                        <div className="flex items-center gap-2 text-yellow-400 font-orbitron text-xs bg-yellow-400/5 px-3 py-2 border border-yellow-400/10">
-                          <Coins size={12} />
-                          <span>1500</span>
-                        </div>
-                      ) : (
-                        <div className="text-[8px] text-emerald-400 font-orbitron uppercase tracking-widest bg-emerald-400/10 px-3 py-2 border border-emerald-400/20">Active</div>
-                      )}
+                      ))}
                     </div>
-                  </div>
-                </div>
-              </div>
+                  </section>
 
-              <button 
-                className="mt-12 px-12 py-3 bg-transparent border border-white/20 text-white text-[11px] font-orbitron tracking-[0.3em] uppercase -skew-x-12 hover:bg-white hover:text-black transition-all"
-                onClick={() => setShopOpen(false)}
-              >
-                <span className="skew-x-12">Return to Hangar</span>
-              </button>
+                  <section>
+                    <h3 className="text-[10px] text-white/40 tracking-[0.3em] mb-6 uppercase">HARDWARE UPGRADES</h3>
+                    <div className="flex flex-col gap-4">
+                      <div 
+                        className={`
+                          flex items-center gap-6 p-4 border transition-all cursor-pointer
+                          ${upgrades.autoShield ? 'border-green-500 bg-green-500/5' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}
+                        `}
+                        onClick={() => !upgrades.autoShield && buyUpgrade('autoShield', 1500)}
+                      >
+                        <ShieldCheck size={24} className="text-neon-cyan" />
+                        <div className="flex-1 flex flex-col gap-1">
+                          <span className="text-sm text-white font-medium">Auto-Shield</span>
+                          <span className="text-xs text-white/40">Start mission with shield active</span>
+                        </div>
+                        {!upgrades.autoShield ? (
+                          <div className="flex items-center gap-1.5 text-neon-gold text-xs">
+                            <Coins size={12} />
+                            <span>1500</span>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-green-400 font-bold tracking-widest">INSTALLED</span>
+                        )}
+                      </div>
+                    </div>
+                  </section>
+                </div>
+
+                <button 
+                  className="mt-8 px-10 py-3 text-xs font-medium tracking-[0.1em] text-white border border-white -skew-x-12 transition-all hover:bg-white hover:text-black self-center"
+                  onClick={() => setShopOpen(false)}
+                >
+                  <span className="block skew-x-12">RETURN TO HANGAR</span>
+                </button>
+              </div>
             </motion.div>
           )}
 
@@ -920,83 +905,69 @@ function App() {
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
-              className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-8 z-40"
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md gap-8 z-40"
             >
-              <h2 className="text-4xl font-black tracking-[0.4em] text-white font-orbitron uppercase">Mission Paused</h2>
+              <h2 className="text-5xl font-light tracking-[0.2em] text-white mb-4">PAUSED</h2>
               <button 
-                onClick={togglePause} 
-                className="flex items-center justify-center gap-4 px-12 py-4 bg-cyan-400 text-black font-black font-orbitron tracking-[0.2em] uppercase -skew-x-12 hover:bg-white transition-all"
+                onClick={togglePause}
+                className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-cyan border border-neon-cyan -skew-x-12 transition-all hover:bg-neon-cyan hover:text-black hover:scale-105 active:scale-95"
               >
-                <Play size={20} strokeWidth={3} className="skew-x-12" />
-                <span className="skew-x-12">Resume</span>
+                <div className="flex items-center gap-3 skew-x-12">
+                  <Play size={16} strokeWidth={1.5} />
+                  <span>RESUME MISSION</span>
+                </div>
               </button>
             </motion.div>
           )}
 
           {gameState === 'gameOver' && (
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }} 
+              initial={{ scale: 0.8, opacity: 0 }} 
               animate={{ scale: 1, opacity: 1 }} 
-              className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-2xl gap-8 z-40"
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-lg gap-6 z-[70]"
             >
-              <div className="flex flex-col items-center gap-1">
-                <h2 className="text-5xl font-black tracking-[0.2em] text-red-500 font-orbitron uppercase">System Crash</h2>
-                <div className="h-[1px] w-full bg-red-500/20"></div>
+              <h2 className="text-4xl font-light tracking-[0.3em] text-neon-pink uppercase mb-4 drop-shadow-[0_0_20px_rgba(255,0,85,0.3)]">Critical Failure</h2>
+              
+              <div className="flex flex-col items-center gap-2 mb-4">
+                <span className="text-[8px] text-white/30 uppercase tracking-[0.2em]">Rank Status</span>
+                <span className="text-2xl font-extralight text-neon-cyan tracking-widest">
+                  {score < 10 ? 'RECRUIT' : 
+                   score < 25 ? 'PILOT' : 
+                   score < 50 ? 'VETERAN' : 
+                   score < 80 ? 'PHANTOM' : 'NEON GOD'}
+                </span>
               </div>
-
-              <div className="flex flex-col items-center gap-6 p-8 border border-white/5 bg-white/2 min-w-[320px]">
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-[10px] text-white/30 tracking-[0.3em] font-orbitron uppercase">Pilot Rank</span>
-                  <span className="text-2xl font-black text-cyan-400 font-orbitron tracking-widest uppercase">
-                    {score < 10 ? 'Recruit' : 
-                     score < 25 ? 'Pilot' : 
-                     score < 50 ? 'Veteran' : 
-                     score < 80 ? 'Phantom' : 'Neon God'}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between w-full gap-12">
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-[9px] text-white/20 uppercase tracking-widest font-orbitron">Final Score</span>
-                    <span className="text-3xl font-bold text-white font-orbitron">{score}</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-[9px] text-white/20 uppercase tracking-widest font-orbitron">Personal Best</span>
-                    <span className="text-3xl font-bold text-yellow-500 font-orbitron">{highScore}</span>
+              
+              <p className="text-xl font-thin text-white tracking-widest">SCORE: {score}</p>
+              
+              {history.length > 0 && (
+                <div className="flex flex-col items-center gap-3 my-4">
+                  <p className="text-[8px] text-white/40 uppercase tracking-widest">Recent Performance</p>
+                  <div className="flex gap-4">
+                    {history.map((s, i) => (
+                      <span key={i} className="text-lg font-extralight text-white/60">{s}</span>
+                    ))}
                   </div>
                 </div>
-
-                {history.length > 0 && (
-                  <div className="flex flex-col items-center gap-3 w-full">
-                    <div className="flex items-center gap-2 w-full">
-                      <div className="flex-1 h-[1px] bg-white/5"></div>
-                      <span className="text-[8px] text-white/20 uppercase tracking-[0.2em] font-orbitron">Mission Log</span>
-                      <div className="flex-1 h-[1px] bg-white/5"></div>
-                    </div>
-                    <div className="flex gap-4">
-                      {history.map((s, i) => (
-                        <span key={i} className="text-xs text-white/40 font-orbitron">{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
 
               <button 
                 onClick={startGame} 
-                className="group relative flex items-center justify-center gap-4 px-16 py-4 bg-red-500 text-white font-black font-orbitron tracking-[0.3em] uppercase -skew-x-12 hover:bg-white hover:text-black transition-all"
+                className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-pink border border-neon-pink -skew-x-12 transition-all hover:bg-neon-pink hover:text-white hover:scale-105 active:scale-95 mt-4"
               >
-                <RotateCcw size={20} className="skew-x-12 group-hover:rotate-180 transition-transform duration-500" />
-                <span className="skew-x-12">Reboot System</span>
+                <div className="flex items-center gap-3 skew-x-12">
+                  <RotateCcw size={20} />
+                  <span>REBOOT SYSTEM</span>
+                </div>
               </button>
             </motion.div>
           )}
         </AnimatePresence>
       </main>
 
-      <footer className="w-full py-4 bg-black/60 border-t border-white/5 flex justify-center">
-        <p className="text-[8px] text-white/20 tracking-[0.4em] font-orbitron uppercase">
-          Neural Interface Dev: Sebastian Vasquez Echavarria
+      <footer className="absolute bottom-8 left-0 right-0 flex justify-center z-10">
+        <p className="text-[10px] text-white/40 font-light tracking-[0.2em] border-b border-white/10 pb-1">
+          CREATED BY SEBASTIAN VASQUEZ ECHAVARRIA
         </p>
       </footer>
     </div>

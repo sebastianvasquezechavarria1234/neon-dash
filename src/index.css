@@ -3,42 +3,99 @@
 
 @theme {
   --font-orbitron: "Orbitron", sans-serif;
-  
-  @keyframes rainbow-shimmer {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
+  --color-neon-cyan: #00f2ff;
+  --color-neon-pink: #ff0055;
+  --color-neon-gold: #ffd700;
 }
 
 :root {
   font-family: "Orbitron", sans-serif;
   color-scheme: dark;
-  background-color: #000;
+  background-color: #0a0a0c;
 }
 
 body {
   margin: 0;
+  font-family: "Orbitron", sans-serif;
+}
+
+.google-sans-flex-main {
+  font-family: "Google Sans Flex", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-variation-settings:
+    "slnt" 0,
+    "wdth" 100,
+    "GRAD" 0,
+    "ROND" 0;
+}
+
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0c 100%);
   overflow: hidden;
-  background: #000;
 }
 
-.animate-rainbow-shimmer {
-  animation: rainbow-shimmer 3s linear infinite;
-  background-size: 400% 400%;
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
 }
 
-/* Custom Scrollbar for the shop */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+
+.title-gradient {
+  background: linear-gradient(to right, #fff, #a5a5a5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 242, 255, 0.2);
-  border-radius: 10px;
+
+button {
+  border-radius: 12px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(4px);
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 242, 255, 0.4);
+
+button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
+  100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); }
 }
