@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, RotateCcw, Trophy, Zap, Pause, PlayCircle, ShoppingCart, Coins, ShieldCheck, Sparkles, Home, User, Save } from 'lucide-react'
+import { Play, RotateCcw, Trophy, Zap, Pause, PlayCircle, ShoppingCart, Coins, ShieldCheck, Sparkles, Home, User, Save, Map as MapIcon, Globe } from 'lucide-react'
 import RainbowCrystal from './RainbowCrystal'
 import './App.css'
 
@@ -39,6 +39,35 @@ function App() {
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
   const [playerName, setPlayerName] = useState(() => localStorage.getItem('neon-dash-playername') || 'PILOT_01');
   const [showProfile, setShowProfile] = useState(false);
+  const [showMaps, setShowMaps] = useState(false);
+  const [currentMap, setCurrentMap] = useState(0);
+
+  const maps = [
+    { 
+      id: 0, name: 'NEON CITY', 
+      bg: 'rgba(40, 20, 60, 0.3)', 
+      primary: '#00f2ff', secondary: '#ff0055',
+      stars: 'rgba(255, 255, 255, 0.4)'
+    },
+    { 
+      id: 1, name: 'DEEP SPACE', 
+      bg: 'rgba(20, 10, 40, 0.5)', 
+      primary: '#a200ff', secondary: '#ffd700',
+      stars: 'rgba(162, 0, 255, 0.6)'
+    },
+    { 
+      id: 2, name: 'CYBER DESERT', 
+      bg: 'rgba(60, 20, 10, 0.4)', 
+      primary: '#ffaa00', secondary: '#ff0000',
+      stars: 'rgba(255, 170, 0, 0.4)'
+    },
+    { 
+      id: 3, name: 'FROZEN TECH', 
+      bg: 'rgba(10, 30, 60, 0.4)', 
+      primary: '#0088ff', secondary: '#ffffff',
+      stars: 'rgba(255, 255, 255, 0.8)'
+    }
+  ];
 
   useEffect(() => {
     if (gameState === 'idle') {
@@ -384,9 +413,19 @@ function App() {
       const g = gameRef.current;
       const obsColor = getDifficultyColor(score);
       
-      // Calculate dynamic speed and spawn rate
-      const currentSpeed = OBSTACLE_SPEED + (score * 0.15); // Faster increase
-      const currentSpawnRate = Math.max(35, Math.floor(SPAWN_RATE - score * 0.8));
+      // Calculate dynamic speed and spawn rate - ACCELERATED
+      const currentSpeed = OBSTACLE_SPEED + (score * 0.3); // Doubled difficulty increase
+      const currentSpawnRate = Math.max(25, Math.floor(SPAWN_RATE - score * 1.5));
+
+      // Auto Map Switch based on score
+      if (gameState === 'playing') {
+        const targetMap = Math.min(3, Math.floor(score / 20));
+        if (targetMap !== currentMap) {
+          setCurrentMap(targetMap);
+          speak(`Entering ${maps[targetMap].name}`);
+          g.flash = { color: maps[targetMap].primary, alpha: 0.5 };
+        }
+      }
 
       // AI Bot logic for Demo Mode (Idle)
       if (gameState === 'idle' && !isPaused) {
@@ -609,13 +648,13 @@ function App() {
       }
 
       // Draw Stars
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.fillStyle = maps[currentMap].stars;
       g.stars.forEach(s => {
         ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
       });
 
       // Grid Color Shift
-      ctx.strokeStyle = score > 25 ? 'rgba(162, 0, 255, 0.12)' : 'rgba(0, 242, 255, 0.12)';
+      ctx.strokeStyle = score > 25 ? `${maps[currentMap].primary}22` : `${maps[currentMap].secondary}22`;
       ctx.lineWidth = 1;
       for(let i=0; i<CANVAS_WIDTH + 100; i+=50) {
         const offset = (g.frame * (isPaused ? 0 : 2)) % 50;
@@ -627,10 +666,10 @@ function App() {
 
       // Draw City Buildings (Parallax Background)
       g.buildings.forEach(b => {
-        ctx.fillStyle = b.color;
+        ctx.fillStyle = maps[currentMap].bg;
         ctx.fillRect(b.x, CANVAS_HEIGHT - b.y, b.w, b.y);
         // Neon window lights
-        ctx.fillStyle = 'rgba(0, 242, 255, 0.15)';
+        ctx.fillStyle = `${maps[currentMap].primary}22`;
         for(let i = 0; i < 3; i++) {
           for(let j = 0; j < 6; j++) {
             if((b.x + i + j) % 3 !== 0)
@@ -868,6 +907,19 @@ function App() {
                     </div>
                   </button>
                 </div>
+
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMaps(true);
+                  }} 
+                  className="w-full py-3 text-[10px] font-medium tracking-[0.2em] text-white border-2 border-white transition-all hover:bg-white/10"
+                >
+                  <div className="flex items-center justify-center gap-3">
+                    <MapIcon size={14} />
+                    <span>SECTOR SELECTION</span>
+                  </div>
+                </button>
               </div>
               
               <p className="mt-4 text-[10px] text-white/50 tracking-wider">TAP OR SPACE TO JUMP</p>
@@ -1164,6 +1216,52 @@ function App() {
                   className="w-full py-4 text-sm font-medium tracking-[0.2em] bg-white text-black hover:bg-neon-cyan transition-all uppercase"
                 >
                   Confirm Registry
+                </button>
+              </div>
+            </motion.div>
+          )}
+          {showMaps && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }} 
+              animate={{ opacity: 1, scale: 1 }} 
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 backdrop-blur-xl z-[80]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-full max-w-2xl p-8 border-2 border-white flex flex-col gap-8">
+                <div className="flex flex-col gap-2">
+                  <h2 className="text-2xl font-light tracking-[0.3em] text-white uppercase text-center">Sector Selection</h2>
+                  <p className="text-[10px] text-white/30 text-center uppercase tracking-widest">Select your deployment zone</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {maps.map((map, index) => (
+                    <div 
+                      key={map.id}
+                      onClick={() => {
+                        setCurrentMap(index);
+                        speak(`Sector ${map.name} confirmed.`);
+                      }}
+                      className={`p-6 border-2 transition-all cursor-pointer flex flex-col gap-3 ${currentMap === index ? 'border-white bg-white/20' : 'border-white/10 hover:border-white/40'}`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] text-white tracking-[0.2em]">{map.name}</span>
+                        {currentMap === index && <Globe size={14} className="text-neon-cyan animate-pulse" />}
+                      </div>
+                      <div className="h-12 w-full flex gap-1 items-end">
+                        <div className="h-full w-1/3" style={{ background: map.bg }}></div>
+                        <div className="h-2/3 w-1/3" style={{ background: map.primary }}></div>
+                        <div className="h-1/3 w-1/3" style={{ background: map.secondary }}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button 
+                  onClick={() => setShowMaps(false)}
+                  className="w-full py-4 text-sm font-medium tracking-[0.2em] bg-white text-black hover:bg-neon-cyan transition-all uppercase"
+                >
+                  Confirm Deployment
                 </button>
               </div>
             </motion.div>
