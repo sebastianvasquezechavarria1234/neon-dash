@@ -697,44 +697,48 @@ function App() {
   }, [gameState, score, highScore]);
 
   return (
-    <div className="game-container" onClick={handleAction}>
-      <header>
-        <div className="header-left">
+    <div className="relative flex flex-col items-center justify-start w-screen h-screen overflow-hidden select-none cursor-crosshair bg-[radial-gradient(circle_at_center,_#0a0a1a_0%,_#000_70%)]" onClick={handleAction}>
+      <header className="relative z-50 flex items-center justify-between w-full px-8 py-3 bg-black/40 backdrop-blur-md border-b border-cyan-500/10">
+        <div className="flex items-center">
           <motion.h1 
             animate={{ textShadow: ["0 0 10px #00f2ff", "0 0 20px #00f2ff", "0 0 10px #00f2ff"] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="title-neon"
+            className="m-0 text-2xl font-bold tracking-tighter text-cyan-400 font-orbitron"
           >
             Neon Dash
           </motion.h1>
         </div>
 
-        <div className="header-right">
-          <div className="stats-container">
-            <div className="stat-item">
-              <Zap size={16} className="icon-pulse" />
-              <span>Score: {score}</span>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 text-white font-medium">
+            <div className="flex items-center gap-2">
+              <Zap size={16} className="text-cyan-400 animate-pulse" />
+              <span className="text-sm">Score: {score}</span>
             </div>
-            <div className="stat-item">
-              <Trophy size={16} />
-              <span>Best: {highScore}</span>
+            <div className="flex items-center gap-2">
+              <Trophy size={16} className="text-yellow-500" />
+              <span className="text-sm">Best: {highScore}</span>
             </div>
-            <div className="stat-item coin-stat">
-              <Coins size={16} color="#ffd700" />
-              <span>{coins}</span>
+            <div className="flex items-center gap-2 px-3 py-1 rounded bg-yellow-400/10 border border-yellow-400/20">
+              <Coins size={16} className="text-yellow-400" />
+              <span className="text-sm text-yellow-400 font-orbitron">{coins}</span>
             </div>
-            <div className="difficulty-progress">
-              <span className="progress-label">Difficulty</span>
-              <div className="progress-track">
+            
+            <div className="hidden md:flex flex-col gap-1 w-24">
+              <span className="text-[8px] uppercase tracking-widest text-white/30 font-orbitron">Difficulty</span>
+              <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                 <motion.div 
-                  className="progress-fill"
+                  className="h-full bg-cyan-400 shadow-[0_0_10px_#00f2ff]"
                   animate={{ width: `${Math.min(100, (score / 50) * 100)}%` }}
-                  transition={{ type: "spring", stiffness: 50 }}
                 />
               </div>
             </div>
+
             {gameState === 'playing' && (
-              <button className="pause-btn" onClick={togglePause}>
+              <button 
+                className="p-2 transition-all hover:bg-white/10 hover:text-cyan-400 rounded-full"
+                onClick={togglePause}
+              >
                 {isPaused ? <PlayCircle size={20} /> : <Pause size={20} />}
               </button>
             )}
@@ -742,13 +746,14 @@ function App() {
         </div>
       </header>
 
-      <main className="canvas-wrapper">
-        <div className="crt-overlay"></div>
+      <main className="relative flex-1 w-full flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none z-10 opacity-40 mix-blend-overlay bg-[linear-gradient(rgba(18,16,16,0)_50%,_rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[length:100%_3px,3px_100%] shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]"></div>
         <canvas 
           ref={canvasRef} 
           width={CANVAS_WIDTH} 
           height={CANVAS_HEIGHT}
           style={{ width: dimensions.width, height: dimensions.height }}
+          className="object-contain"
         />
         
         <AnimatePresence>
@@ -757,25 +762,38 @@ function App() {
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }}
-              className="overlay"
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-lg gap-8 z-40"
             >
-              <button className="primary-btn mission-start-btn" onClick={startGame}>
-                <Play size={16} strokeWidth={1.5} />
-                <span>Start Mission</span>
-              </button>
-              
-              <div className="menu-row">
-                <button onClick={cycleSkin} className="secondary-btn ship-color-btn">
-                  <span className="skin-dot" style={{ backgroundColor: playerSkin }}></span>
-                  <span>Change Ship</span>
+              <div className="flex flex-col items-center gap-2">
+                <h2 className="text-5xl font-bold tracking-[0.3em] text-white font-orbitron uppercase">System Standby</h2>
+                <p className="text-cyan-400/60 text-[10px] tracking-widest font-orbitron">READY FOR DEPLOYMENT</p>
+              </div>
+
+              <div className="flex flex-col gap-4 w-64">
+                <button 
+                  className="group relative flex items-center justify-center gap-3 py-4 bg-transparent border border-cyan-400 text-cyan-400 font-orbitron tracking-[0.2em] -skew-x-12 transition-all hover:bg-cyan-400 hover:text-black overflow-hidden"
+                  onClick={startGame}
+                >
+                  <div className="absolute inset-0 bg-cyan-400/20 translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
+                  <Play size={18} strokeWidth={2} className="skew-x-12" />
+                  <span className="skew-x-12">Start Mission</span>
                 </button>
-                <button onClick={() => setShopOpen(true)} className="secondary-btn shop-btn">
-                  <ShoppingCart size={16} />
-                  <span>The Vault</span>
-                </button>
+                
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => setShopOpen(true)}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 border border-white/10 bg-white/5 text-white text-[11px] font-orbitron tracking-widest -skew-x-12 hover:bg-white/10 transition-all"
+                  >
+                    <ShoppingCart size={14} className="skew-x-12" />
+                    <span className="skew-x-12 text-[10px]">The Vault</span>
+                  </button>
+                </div>
               </div>
               
-              <p className="controls-hint">Tap or Space to Jump</p>
+              <div className="flex flex-col items-center gap-1 opacity-40">
+                <p className="text-[9px] text-white tracking-[0.2em] font-orbitron uppercase">Controls</p>
+                <p className="text-[8px] text-white tracking-widest">TAP / SPACE TO JUMP</p>
+              </div>
             </motion.div>
           )}
 
@@ -784,72 +802,116 @@ function App() {
               initial={{ opacity: 0, y: 50 }} 
               animate={{ opacity: 1, y: 0 }} 
               exit={{ opacity: 0, y: 50 }}
-              className="overlay shop-overlay"
+              className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-3xl p-8"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="shop-header">
-                <h2 className="shop-title">NEON VAULT</h2>
-                <div className="shop-coins">
-                  <Coins size={20} color="#ffd700" />
-                  <span>{coins} NEON SHARDS</span>
+              <div className="w-full max-w-3xl flex justify-between items-center border-b border-cyan-500/20 pb-6 mb-8">
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-3xl font-black tracking-[0.2em] text-white font-orbitron">NEON VAULT</h2>
+                  <p className="text-[10px] text-cyan-400/50 tracking-[0.3em] font-orbitron uppercase">Authorized Access Only</p>
+                </div>
+                <div className="flex items-center gap-3 px-5 py-2 rounded-none bg-yellow-400/5 border border-yellow-400/20">
+                  <Coins size={20} className="text-yellow-400" />
+                  <span className="text-lg font-bold text-yellow-400 font-orbitron">{coins} <span className="text-[10px] opacity-60">SHARDS</span></span>
                 </div>
               </div>
 
-              <div className="shop-content">
-                <div className="shop-section">
-                  <h3>SYSTEM SKINS</h3>
-                  <div className="skins-grid">
+              <div className="w-full max-w-3xl overflow-y-auto pr-4 custom-scrollbar flex flex-col gap-12 max-h-[60vh]">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <Sparkles size={16} className="text-cyan-400" />
+                    <h3 className="text-xs text-white/40 tracking-[0.4em] font-orbitron uppercase">Tactical Skins</h3>
+                    <div className="flex-1 h-[1px] bg-white/5"></div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {skins.map(skin => (
                       <div 
                         key={skin.name} 
-                        className={`skin-card rarity-${skin.rarity.toLowerCase()} ${playerSkin === skin.color ? 'active' : ''} ${!unlockedSkins.includes(skin.color) ? 'locked' : ''}`}
+                        className={`group relative p-5 flex flex-col items-center gap-4 cursor-pointer transition-all duration-500 border rounded-none overflow-hidden
+                          ${playerSkin === skin.color ? 'border-cyan-400 bg-cyan-400/10 ring-1 ring-cyan-400/50' : 'border-white/5 bg-white/2 hover:border-white/20 hover:bg-white/5'}
+                          ${!unlockedSkins.includes(skin.color) ? 'opacity-80 hover:opacity-100' : ''}
+                        `}
                         onClick={() => unlockedSkins.includes(skin.color) ? setPlayerSkin(skin.color) : buySkin(skin)}
                       >
-                        <div className={`skin-preview ${skin.color === 'rainbow' ? 'rainbow-effect' : ''}`} style={{ backgroundColor: skin.color === 'rainbow' ? 'transparent' : skin.color }}></div>
-                        <div className="skin-info">
-                          <span className="skin-name">{skin.name}</span>
-                          <span className="skin-rarity">{skin.rarity}</span>
+                        <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                           <div className="w-1 h-1 bg-white/20 rounded-full"></div>
                         </div>
+
+                        {skin.color === 'rainbow' ? (
+                          <div className="relative w-12 h-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                            <div className="absolute inset-0 rounded-sm opacity-50 blur-xl animate-rainbow-shimmer" 
+                                 style={{ background: 'linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000)', backgroundSize: '400% 400%' }}></div>
+                            <div className="relative w-full h-full rounded-sm animate-rainbow-shimmer shadow-2xl border border-white/20" 
+                                 style={{ background: 'linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000)', backgroundSize: '400% 400%' }}></div>
+                          </div>
+                        ) : (
+                          <div className="w-12 h-12 rounded-sm transition-transform duration-500 group-hover:scale-110" 
+                               style={{ backgroundColor: skin.color, boxShadow: `0 0 30px ${skin.color === '#111111' ? 'rgba(255,255,255,0.2)' : skin.color + '44'}` }}></div>
+                        )}
+                        
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[11px] text-white font-orbitron tracking-wider">{skin.name}</span>
+                          <span className={`text-[7px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full border
+                            ${skin.rarity === 'Divine' ? 'border-pink-500/50 text-pink-400 bg-pink-500/10' : 
+                              skin.rarity === 'Ultimate' ? 'border-white/50 text-white bg-white/10' :
+                              skin.rarity === 'Mythic' ? 'border-red-500/50 text-red-400 bg-red-500/10' :
+                              'border-white/20 text-white/40'}
+                          `}>{skin.rarity}</span>
+                        </div>
+
                         {!unlockedSkins.includes(skin.color) ? (
-                          <div className="price-tag">
+                          <div className="flex items-center gap-2 text-yellow-400 font-orbitron text-xs bg-yellow-400/5 px-3 py-1 rounded-full border border-yellow-400/10">
                             <Coins size={12} />
                             <span>{skin.price}</span>
                           </div>
                         ) : (
-                          <span className="owned-tag">OWNED</span>
+                          <span className="text-[8px] text-cyan-400/60 font-orbitron uppercase tracking-widest">Authorized</span>
                         )}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="shop-section">
-                  <h3>HARDWARE UPGRADES</h3>
-                  <div className="upgrades-grid">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <ShieldCheck size={16} className="text-cyan-400" />
+                    <h3 className="text-xs text-white/40 tracking-[0.4em] font-orbitron uppercase">System Modules</h3>
+                    <div className="flex-1 h-[1px] bg-white/5"></div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div 
-                      className={`upgrade-card ${upgrades.autoShield ? 'maxed' : ''}`}
+                      className={`group relative p-5 flex items-center gap-6 cursor-pointer transition-all duration-300 border
+                        ${upgrades.autoShield ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-white/5 bg-white/2 hover:border-white/20'}
+                      `}
                       onClick={() => !upgrades.autoShield && buyUpgrade('autoShield', 1500)}
                     >
-                      <ShieldCheck size={24} className="upgrade-icon" />
-                      <div className="upgrade-info">
-                        <span className="upgrade-name">Auto-Shield</span>
-                        <span className="upgrade-desc">Start mission with shield active</span>
+                      <div className={`p-4 rounded-none border ${upgrades.autoShield ? 'border-emerald-500/40 text-emerald-400' : 'border-white/10 text-white/40'}`}>
+                        <ShieldCheck size={28} />
+                      </div>
+                      <div className="flex-1 flex flex-col gap-1">
+                        <span className="text-sm text-white font-orbitron tracking-widest uppercase">Auto-Shield Alpha</span>
+                        <span className="text-[10px] text-white/40">Inject defensive shield at mission launch</span>
                       </div>
                       {!upgrades.autoShield ? (
-                        <div className="price-tag">
+                        <div className="flex items-center gap-2 text-yellow-400 font-orbitron text-xs bg-yellow-400/5 px-3 py-2 border border-yellow-400/10">
                           <Coins size={12} />
                           <span>1500</span>
                         </div>
                       ) : (
-                        <span className="owned-tag">INSTALLED</span>
+                        <div className="text-[8px] text-emerald-400 font-orbitron uppercase tracking-widest bg-emerald-400/10 px-3 py-2 border border-emerald-400/20">Active</div>
                       )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <button className="primary-btn close-shop-btn" onClick={() => setShopOpen(false)}>
-                <span>Return to Hangar</span>
+              <button 
+                className="mt-12 px-12 py-3 bg-transparent border border-white/20 text-white text-[11px] font-orbitron tracking-[0.3em] uppercase -skew-x-12 hover:bg-white hover:text-black transition-all"
+                onClick={() => setShopOpen(false)}
+              >
+                <span className="skew-x-12">Return to Hangar</span>
               </button>
             </motion.div>
           )}
@@ -858,56 +920,84 @@ function App() {
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
-              className="overlay pause-modal"
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-xl gap-8 z-40"
             >
-              <h2 className="pause-title">Paused</h2>
-              <button onClick={togglePause} className="primary-btn resume-btn">
-                <Play size={16} strokeWidth={1.5} />
-                <span>Resume Mission</span>
+              <h2 className="text-4xl font-black tracking-[0.4em] text-white font-orbitron uppercase">Mission Paused</h2>
+              <button 
+                onClick={togglePause} 
+                className="flex items-center justify-center gap-4 px-12 py-4 bg-cyan-400 text-black font-black font-orbitron tracking-[0.2em] uppercase -skew-x-12 hover:bg-white transition-all"
+              >
+                <Play size={20} strokeWidth={3} className="skew-x-12" />
+                <span className="skew-x-12">Resume</span>
               </button>
             </motion.div>
           )}
 
           {gameState === 'gameOver' && (
             <motion.div 
-              initial={{ scale: 0.8, opacity: 0 }} 
+              initial={{ scale: 0.9, opacity: 0 }} 
               animate={{ scale: 1, opacity: 1 }} 
-              className="overlay game-over"
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-2xl gap-8 z-40"
             >
-              <h2>Critical Failure</h2>
-              <div className="rank-container">
-                <span className="rank-label">Rank Status</span>
-                <span className="rank-name">
-                  {score < 10 ? 'Recruit' : 
-                   score < 25 ? 'Pilot' : 
-                   score < 50 ? 'Veteran' : 
-                   score < 80 ? 'Phantom' : 'Neon God'}
-                </span>
+              <div className="flex flex-col items-center gap-1">
+                <h2 className="text-5xl font-black tracking-[0.2em] text-red-500 font-orbitron uppercase">System Crash</h2>
+                <div className="h-[1px] w-full bg-red-500/20"></div>
               </div>
-              <p className="final-score">Score: {score}</p>
-              
-              {history.length > 0 && (
-                <div className="history-list">
-                  <p className="history-title">Recent Scores</p>
-                  <div className="scores-row">
-                    {history.map((s, i) => (
-                      <span key={i} className="history-score">{s}</span>
-                    ))}
+
+              <div className="flex flex-col items-center gap-6 p-8 border border-white/5 bg-white/2 min-w-[320px]">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-[10px] text-white/30 tracking-[0.3em] font-orbitron uppercase">Pilot Rank</span>
+                  <span className="text-2xl font-black text-cyan-400 font-orbitron tracking-widest uppercase">
+                    {score < 10 ? 'Recruit' : 
+                     score < 25 ? 'Pilot' : 
+                     score < 50 ? 'Veteran' : 
+                     score < 80 ? 'Phantom' : 'Neon God'}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between w-full gap-12">
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-[9px] text-white/20 uppercase tracking-widest font-orbitron">Final Score</span>
+                    <span className="text-3xl font-bold text-white font-orbitron">{score}</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-[9px] text-white/20 uppercase tracking-widest font-orbitron">Personal Best</span>
+                    <span className="text-3xl font-bold text-yellow-500 font-orbitron">{highScore}</span>
                   </div>
                 </div>
-              )}
 
-              <button onClick={startGame} className="primary-btn retry-btn">
-                <RotateCcw size={20} />
-                <span>Reboot System</span>
+                {history.length > 0 && (
+                  <div className="flex flex-col items-center gap-3 w-full">
+                    <div className="flex items-center gap-2 w-full">
+                      <div className="flex-1 h-[1px] bg-white/5"></div>
+                      <span className="text-[8px] text-white/20 uppercase tracking-[0.2em] font-orbitron">Mission Log</span>
+                      <div className="flex-1 h-[1px] bg-white/5"></div>
+                    </div>
+                    <div className="flex gap-4">
+                      {history.map((s, i) => (
+                        <span key={i} className="text-xs text-white/40 font-orbitron">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button 
+                onClick={startGame} 
+                className="group relative flex items-center justify-center gap-4 px-16 py-4 bg-red-500 text-white font-black font-orbitron tracking-[0.3em] uppercase -skew-x-12 hover:bg-white hover:text-black transition-all"
+              >
+                <RotateCcw size={20} className="skew-x-12 group-hover:rotate-180 transition-transform duration-500" />
+                <span className="skew-x-12">Reboot System</span>
               </button>
             </motion.div>
           )}
         </AnimatePresence>
       </main>
 
-      <footer>
-        <p className="footer-text">Created by Sebastian Vasquez Echavarria</p>
+      <footer className="w-full py-4 bg-black/60 border-t border-white/5 flex justify-center">
+        <p className="text-[8px] text-white/20 tracking-[0.4em] font-orbitron uppercase">
+          Neural Interface Dev: Sebastian Vasquez Echavarria
+        </p>
       </footer>
     </div>
   )
