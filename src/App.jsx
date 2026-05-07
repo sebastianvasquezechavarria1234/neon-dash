@@ -47,25 +47,29 @@ function App() {
       id: 0, name: 'NEON CITY', 
       bg: 'rgba(40, 20, 60, 0.3)', 
       primary: '#00f2ff', secondary: '#ff0055',
-      stars: 'rgba(255, 255, 255, 0.4)'
+      stars: 'rgba(255, 255, 255, 0.4)',
+      type: 'city'
     },
     { 
-      id: 1, name: 'DEEP SPACE', 
-      bg: 'rgba(20, 10, 40, 0.5)', 
-      primary: '#a200ff', secondary: '#ffd700',
-      stars: 'rgba(162, 0, 255, 0.6)'
-    },
-    { 
-      id: 2, name: 'CYBER DESERT', 
-      bg: 'rgba(60, 20, 10, 0.4)', 
-      primary: '#ffaa00', secondary: '#ff0000',
-      stars: 'rgba(255, 170, 0, 0.4)'
-    },
-    { 
-      id: 3, name: 'FROZEN TECH', 
+      id: 1, name: 'ETERNAL FROST', 
       bg: 'rgba(10, 30, 60, 0.4)', 
       primary: '#0088ff', secondary: '#ffffff',
-      stars: 'rgba(255, 255, 255, 0.8)'
+      stars: 'rgba(255, 255, 255, 0.8)',
+      type: 'snow'
+    },
+    { 
+      id: 2, name: 'INFERNO', 
+      bg: 'rgba(30, 10, 10, 0.6)', 
+      primary: '#ff4400', secondary: '#ff0000',
+      stars: 'rgba(255, 68, 0, 0.3)',
+      type: 'hell'
+    },
+    { 
+      id: 3, name: 'ETHER FOREST', 
+      bg: 'rgba(10, 40, 20, 0.4)', 
+      primary: '#00ff66', secondary: '#88ff00',
+      stars: 'rgba(0, 255, 102, 0.2)',
+      type: 'forest'
     }
   ];
 
@@ -630,10 +634,38 @@ function App() {
         g.powerups = g.powerups.filter(pu => pu.x + pu.size > 0);
         g.zones = g.zones.filter(z => z.x + z.w > 0);
 
+        // Environmental Particles (Snow, Embers, Leaves)
+        if (g.frame % 5 === 0) {
+          const mapType = maps[currentMap].type;
+          if (mapType === 'snow') {
+            g.particles.push({
+              x: Math.random() * CANVAS_WIDTH, y: -10,
+              vx: (Math.random() - 0.2) * 2, vy: 2 + Math.random() * 2,
+              life: 1.0, color: '#fff', size: 2, type: 'env'
+            });
+          } else if (mapType === 'hell') {
+            g.particles.push({
+              x: Math.random() * CANVAS_WIDTH, y: CANVAS_HEIGHT + 10,
+              vx: (Math.random() - 0.5) * 1, vy: -1 - Math.random() * 2,
+              life: 1.0, color: '#ff4400', size: 3, type: 'env'
+            });
+          } else if (mapType === 'forest') {
+            g.particles.push({
+              x: CANVAS_WIDTH + 10, y: Math.random() * CANVAS_HEIGHT,
+              vx: -2 - Math.random() * 2, vy: (Math.random() - 0.5) * 1,
+              life: 1.0, color: '#00ff66', size: 4, type: 'env'
+            });
+          }
+        }
+
         g.particles.forEach(p => {
           p.x += p.vx;
           p.y += p.vy;
-          p.life -= 0.02;
+          if (p.type === 'env') {
+            p.life -= 0.005;
+          } else {
+            p.life -= 0.02;
+          }
         });
         g.particles = g.particles.filter(p => p.life > 0);
 
@@ -648,10 +680,12 @@ function App() {
       }
 
       // Draw Stars
-      ctx.fillStyle = maps[currentMap].stars;
-      g.stars.forEach(s => {
-        ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
-      });
+      if (maps[currentMap].type !== 'hell') {
+        ctx.fillStyle = maps[currentMap].stars;
+        g.stars.forEach(s => {
+          ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
+        });
+      }
 
       // Grid Color Shift
       ctx.strokeStyle = score > 25 ? `${maps[currentMap].primary}22` : `${maps[currentMap].secondary}22`;
@@ -664,19 +698,60 @@ function App() {
         ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CANVAS_WIDTH, i); ctx.stroke();
       }
 
-      // Draw City Buildings (Parallax Background)
+      // Draw Map-Specific Elements
+      const map = maps[currentMap];
       g.buildings.forEach(b => {
-        ctx.fillStyle = maps[currentMap].bg;
-        ctx.fillRect(b.x, CANVAS_HEIGHT - b.y, b.w, b.y);
-        // Neon window lights
-        ctx.fillStyle = `${maps[currentMap].primary}22`;
-        for(let i = 0; i < 3; i++) {
-          for(let j = 0; j < 6; j++) {
-            if((b.x + i + j) % 3 !== 0)
-              ctx.fillRect(b.x + 8 + i * 22, CANVAS_HEIGHT - b.y + 10 + j * 28, 12, 14);
+        ctx.save();
+        if (map.type === 'city') {
+          ctx.fillStyle = map.bg;
+          ctx.fillRect(b.x, CANVAS_HEIGHT - b.y, b.w, b.y);
+          ctx.fillStyle = `${map.primary}22`;
+          for(let i = 0; i < 3; i++) {
+            for(let j = 0; j < 6; j++) {
+              if((b.x + i + j) % 3 !== 0)
+                ctx.fillRect(b.x + 8 + i * 22, CANVAS_HEIGHT - b.y + 10 + j * 28, 12, 14);
+            }
           }
+        } else if (map.type === 'snow') {
+          // Snowy Buildings
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(b.x, CANVAS_HEIGHT - b.y, b.w, 10); // Snow on top
+          ctx.fillStyle = 'rgba(100, 150, 255, 0.3)';
+          ctx.fillRect(b.x, CANVAS_HEIGHT - b.y + 10, b.w, b.y - 10);
+        } else if (map.type === 'hell') {
+          // Spiky Rocks
+          ctx.fillStyle = '#221111';
+          ctx.beginPath();
+          ctx.moveTo(b.x, CANVAS_HEIGHT);
+          ctx.lineTo(b.x + b.w / 2, CANVAS_HEIGHT - b.y);
+          ctx.lineTo(b.x + b.w, CANVAS_HEIGHT);
+          ctx.fill();
+          ctx.strokeStyle = '#ff0000';
+          ctx.stroke();
+        } else if (map.type === 'forest') {
+          // Trees
+          ctx.fillStyle = '#2d1b0d';
+          ctx.fillRect(b.x + b.w/2 - 10, CANVAS_HEIGHT - b.y, 20, b.y); // Trunk
+          ctx.fillStyle = '#0a3d1d';
+          ctx.beginPath();
+          ctx.arc(b.x + b.w/2, CANVAS_HEIGHT - b.y, b.w/2, 0, Math.PI * 2);
+          ctx.fill();
         }
+        ctx.restore();
       });
+
+      // Special Bottom Decoration
+      if (map.type === 'hell') {
+        const t = Date.now() * 0.002;
+        ctx.fillStyle = '#ff4400';
+        ctx.beginPath();
+        ctx.moveTo(0, CANVAS_HEIGHT);
+        for(let x = 0; x <= CANVAS_WIDTH; x += 20) {
+          ctx.lineTo(x, CANVAS_HEIGHT - 15 + Math.sin(x * 0.05 + t) * 10);
+        }
+        ctx.lineTo(CANVAS_WIDTH, CANVAS_HEIGHT);
+        ctx.fill();
+      }
 
       // Draw Speed Zones
       g.zones.forEach(z => {
@@ -1248,10 +1323,15 @@ function App() {
                         <span className="text-[10px] text-white tracking-[0.2em]">{map.name}</span>
                         {currentMap === index && <Globe size={14} className="text-neon-cyan animate-pulse" />}
                       </div>
-                      <div className="h-12 w-full flex gap-1 items-end">
+                      <div className="h-12 w-full flex gap-1 items-end overflow-hidden border border-white/5">
                         <div className="h-full w-1/3" style={{ background: map.bg }}></div>
-                        <div className="h-2/3 w-1/3" style={{ background: map.primary }}></div>
-                        <div className="h-1/3 w-1/3" style={{ background: map.secondary }}></div>
+                        <div className="h-full w-1/3 flex items-center justify-center bg-black/20">
+                          {map.type === 'snow' && <div className="text-white">❄</div>}
+                          {map.type === 'hell' && <div className="text-red-500">🔥</div>}
+                          {map.type === 'forest' && <div className="text-green-500">🌲</div>}
+                          {map.type === 'city' && <div className="text-cyan-500">🏢</div>}
+                        </div>
+                        <div className="h-full w-1/3" style={{ background: map.primary }}></div>
                       </div>
                     </div>
                   ))}
