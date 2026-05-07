@@ -7,9 +7,9 @@ import './App.css'
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 400;
 const GRAVITY = 0.6;
-const JUMP_FORCE = -10;
-const OBSTACLE_SPEED = 5;
-const SPAWN_RATE = 100; // frames
+const JUMP_FORCE = -12;
+const OBSTACLE_SPEED = 8;
+const SPAWN_RATE = 70; // frames
 
 function App() {
   const canvasRef = useRef(null);
@@ -109,17 +109,7 @@ function App() {
 
   useEffect(() => {
     const handleResize = () => {
-      const container = canvasRef.current?.parentElement;
-      if (!container) return;
-      
-      const width = container.clientWidth;
-      const height = container.clientHeight;
-      // Maintain 2:1 ratio
-      if (width / 2 > height) {
-        setDimensions({ width: height * 2, height: height });
-      } else {
-        setDimensions({ width: width, height: width / 2 });
-      }
+      setDimensions({ width: window.innerWidth, height: window.innerHeight });
     };
 
     window.addEventListener('resize', handleResize);
@@ -871,8 +861,8 @@ function App() {
   }, [gameState, score, highScore]);
 
   return (
-    <div className="relative flex flex-col items-center w-screen h-screen overflow-hidden select-none cursor-crosshair bg-[radial-gradient(circle_at_center,#0a0a1a_0%,#000_70%)] font-orbitron" onClick={handleAction}>
-      <header className="relative z-50 flex items-center justify-between w-full px-8 py-3 bg-black/40 backdrop-blur-md border-b border-neon-cyan/20 shrink-0">
+    <div className="relative w-screen h-screen overflow-hidden select-none cursor-crosshair bg-black font-orbitron" onClick={handleAction}>
+      <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-3 bg-gradient-to-b from-black/80 to-transparent">
         <div className="header-left">
           <motion.h1 
             animate={{ textShadow: ["0 0 10px #00f2ff", "0 0 20px #00f2ff", "0 0 10px #00f2ff"] }}
@@ -919,14 +909,14 @@ function App() {
         </div>
       </header>
 
-      <main className="relative flex-1 flex justify-center items-center w-full overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none z-10 opacity-40 mix-blend-overlay bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[length:100%_3px,3px_100%] shadow-[inset_0_0_100px_rgba(0,0,0,0.5)]"></div>
+      <main className="absolute inset-0 w-full h-full overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none z-10 opacity-30 mix-blend-overlay bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[length:100%_3px,3px_100%] shadow-[inset_0_0_150px_rgba(0,0,0,0.7)]"></div>
         <canvas 
           ref={canvasRef} 
           width={CANVAS_WIDTH} 
           height={CANVAS_HEIGHT}
           style={{ width: dimensions.width, height: dimensions.height }}
-          className="object-contain"
+          className="object-fill w-full h-full"
         />
         
         <AnimatePresence>
@@ -1349,9 +1339,9 @@ function App() {
         </AnimatePresence>
       </main>
 
-      <footer className="absolute bottom-8 left-0 right-0 flex justify-center z-10">
-        <p className="text-[10px] text-white/40 font-light tracking-[0.2em] border-b border-white/10 pb-1">
-          CREATED BY SEBASTIAN VASQUEZ ECHAVARRIA
+      <footer className="absolute bottom-4 left-0 right-0 flex justify-center z-10 pointer-events-none">
+        <p className="text-[8px] text-white/20 font-light tracking-[0.3em] uppercase">
+          Sector Deployment Active | Pilot: {playerName}
         </p>
       </footer>
     </div>
