@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, RotateCcw, Trophy, Zap, Pause, PlayCircle, ShoppingCart, Coins, ShieldCheck, Sparkles } from 'lucide-react'
+import { Play, RotateCcw, Trophy, Zap, Pause, PlayCircle, ShoppingCart, Coins, ShieldCheck, Sparkles, Home } from 'lucide-react'
 import RainbowCrystal from './RainbowCrystal'
 import './App.css'
 
@@ -227,6 +227,12 @@ function App() {
     if (gameState === 'playing') {
       setIsPaused(!isPaused);
     }
+  };
+
+  const goToMainMenu = () => {
+    setGameState('idle');
+    setIsPaused(false);
+    speak("Returning to hangar.");
   };
 
   const createParticles = (x, y, color, count) => {
@@ -757,7 +763,10 @@ function App() {
             >
               <button 
                 className="group relative px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-cyan border border-neon-cyan -skew-x-12 transition-all hover:bg-neon-cyan hover:text-black hover:scale-105 active:scale-95"
-                onClick={startGame}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  startGame();
+                }}
               >
                 <div className="flex items-center gap-3 skew-x-12">
                   <Play size={16} strokeWidth={1.5} />
@@ -767,7 +776,10 @@ function App() {
               
               <div className="flex gap-4">
                 <button 
-                  onClick={() => setShopOpen(true)} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShopOpen(true);
+                  }} 
                   className="px-8 py-3 text-sm font-medium tracking-[0.1em] text-neon-cyan border border-neon-cyan/30 -skew-x-12 transition-all hover:bg-neon-cyan/10 hover:border-neon-cyan"
                 >
                   <div className="flex items-center gap-3 skew-x-12">
@@ -893,15 +905,32 @@ function App() {
               className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md gap-8 z-40"
             >
               <h2 className="text-5xl font-light tracking-[0.2em] text-white mb-4">PAUSED</h2>
-              <button 
-                onClick={togglePause}
-                className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-cyan border border-neon-cyan -skew-x-12 transition-all hover:bg-neon-cyan hover:text-black hover:scale-105 active:scale-95"
-              >
-                <div className="flex items-center gap-3 skew-x-12">
-                  <Play size={16} strokeWidth={1.5} />
-                  <span>RESUME MISSION</span>
-                </div>
-              </button>
+              <div className="flex gap-4">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePause(e);
+                  }}
+                  className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-cyan border border-neon-cyan -skew-x-12 transition-all hover:bg-neon-cyan hover:text-black hover:scale-105 active:scale-95"
+                >
+                  <div className="flex items-center gap-3 skew-x-12">
+                    <Play size={16} strokeWidth={1.5} />
+                    <span>RESUME</span>
+                  </div>
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToMainMenu();
+                  }}
+                  className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-white/50 border border-white/20 -skew-x-12 transition-all hover:bg-white/10 hover:text-white hover:border-white"
+                >
+                  <div className="flex items-center gap-3 skew-x-12">
+                    <Home size={16} strokeWidth={1.5} />
+                    <span>MENU</span>
+                  </div>
+                </button>
+              </div>
             </motion.div>
           )}
 
@@ -936,15 +965,32 @@ function App() {
                 </div>
               )}
 
-              <button 
-                onClick={startGame} 
-                className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-pink border border-neon-pink -skew-x-12 transition-all hover:bg-neon-pink hover:text-white hover:scale-105 active:scale-95 mt-4"
-              >
-                <div className="flex items-center gap-3 skew-x-12">
-                  <RotateCcw size={20} />
-                  <span>REBOOT SYSTEM</span>
-                </div>
-              </button>
+              <div className="flex gap-4 mt-4">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    startGame();
+                  }} 
+                  className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-pink border border-neon-pink -skew-x-12 transition-all hover:bg-neon-pink hover:text-white hover:scale-105 active:scale-95"
+                >
+                  <div className="flex items-center gap-3 skew-x-12">
+                    <RotateCcw size={20} />
+                    <span>REBOOT</span>
+                  </div>
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToMainMenu();
+                  }} 
+                  className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-white/50 border border-white/20 -skew-x-12 transition-all hover:bg-white/10 hover:text-white hover:border-white"
+                >
+                  <div className="flex items-center gap-3 skew-x-12">
+                    <Home size={20} />
+                    <span>MENU</span>
+                  </div>
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
