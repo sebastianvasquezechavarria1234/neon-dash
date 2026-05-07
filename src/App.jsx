@@ -932,28 +932,31 @@ function App() {
                 <h2 className="text-4xl font-light tracking-[0.2em] text-white">{playerName}</h2>
               </div>
 
-              <div className="flex flex-col gap-4 w-64">
+              <div className="flex flex-col gap-2 w-80">
                 <button 
-                  className="group relative px-10 py-4 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white hover:text-black hover:scale-110 hover:-rotate-3 active:scale-95"
+                  className="group relative px-10 py-4 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3 active:scale-95"
                   onClick={(e) => {
                     e.stopPropagation();
                     startGame();
                   }}
                 >
                   <div className="flex items-center justify-center gap-3">
-                    <Rocket size={18} fill="currentColor" />
+                    <Rocket size={16} fill="currentColor" />
                     <span>Start Mission</span>
                   </div>
                 </button>
-                         <div className="grid grid-cols-2 gap-4">
+                <div className="flex gap-2">
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
                       setShopOpen(true);
                     }} 
-                    className="px-4 py-3 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3"
+                    className="relative flex-1 px-4 py-3 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3"
                   >
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[7px] px-2 py-0.5 font-bold z-10 shadow-lg">
+                      Nuevos
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
                       <Box size={16} />
                       <span>Vault</span>
                     </div>
@@ -963,9 +966,9 @@ function App() {
                       e.stopPropagation();
                       setShowProfile(true);
                     }} 
-                    className="px-4 py-3 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3"
+                    className="flex-1 px-4 py-3 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3"
                   >
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="flex items-center justify-center gap-2">
                       <Gamepad2 size={16} />
                       <span>Pilot</span>
                     </div>
@@ -980,7 +983,7 @@ function App() {
                   className="w-full py-3 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3"
                 >
                   <div className="flex items-center justify-center gap-3">
-                    <Compass size={14} />
+                    <Compass size={16} />
                     <span>Sector Selection</span>
                   </div>
                 </button>
