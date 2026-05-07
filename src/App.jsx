@@ -20,7 +20,7 @@ function App() {
   const [history, setHistory] = useState(() => JSON.parse(localStorage.getItem('neon-dash-history') || '[]'));
   
   const gameRef = useRef({
-    player: { x: 50, y: 200, vy: 0, size: 30, color: '#00f2ff' },
+    player: { x: 50, y: 200, vy: 0, size: 30, color: '#888888' },
     obstacles: [],
     coins: [],
     particles: [],
@@ -30,13 +30,36 @@ function App() {
   });
 
   const [coins, setCoins] = useState(() => parseInt(localStorage.getItem('neon-dash-coins') || '0'));
-  const [unlockedSkins, setUnlockedSkins] = useState(() => JSON.parse(localStorage.getItem('neon-dash-unlocked') || '["#00f2ff"]'));
+  const [unlockedSkins, setUnlockedSkins] = useState(() => JSON.parse(localStorage.getItem('neon-dash-unlocked') || '["#888888"]'));
   const [shopOpen, setShopOpen] = useState(false);
   const [upgrades, setUpgrades] = useState(() => JSON.parse(localStorage.getItem('neon-dash-upgrades') || '{"autoShield": false}'));
+  const [playerShape, setPlayerShape] = useState(() => localStorage.getItem('neon-dash-shape') || 'arrow');
+  const [shopTab, setShopTab] = useState('skins'); // skins, chassis, upgrades
 
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
 
   useEffect(() => {
+    if (gameState === 'idle') {
+      // Initialize demo state
+      gameRef.current = {
+        player: { 
+          x: 80, y: 200, vy: 0, size: 30, 
+          color: playerSkin, shape: playerShape,
+          shield: false, jumps: 0, trail: [] 
+        },
+        obstacles: [], powerups: [], coins: [], particles: [], zones: [],
+        buildings: Array.from({ length: 15 }, (_, i) => ({
+          x: i * 150, y: 150 + Math.random() * 150, w: 100 + Math.random() * 80,
+          speed: 0.2 + Math.random() * 0.3, color: `rgba(40, 20, 60, 0.3)`
+        })),
+        stars: Array.from({ length: 50 }, () => ({
+          x: Math.random() * CANVAS_WIDTH, y: Math.random() * CANVAS_HEIGHT,
+          size: Math.random() * 2, speed: 0.5 + Math.random() * 1.5
+        })),
+        frame: 0, speed: OBSTACLE_SPEED, shake: 0, flash: null
+      };
+    }
+
     if (gameState === 'gameOver') {
       const newHistory = [score, ...history.filter(s => s !== score)].slice(0, 5);
       setHistory(newHistory);
@@ -122,7 +145,7 @@ function App() {
     }
   };
 
-  const [playerSkin, setPlayerSkin] = useState(() => localStorage.getItem('neon-dash-skin') || '#00f2ff');
+  const [playerSkin, setPlayerSkin] = useState(() => localStorage.getItem('neon-dash-skin') || '#888888');
 
   const skins = [
     { name: 'Base', color: '#888888', price: 0, rarity: 'Common' },
@@ -179,6 +202,7 @@ function App() {
         vy: 0, 
         size: 30, 
         color: playerSkin, 
+        shape: playerShape,
         shield: upgrades.autoShield, 
         jumps: 0, 
         trail: [] 
@@ -257,7 +281,8 @@ function App() {
   }, [gameState, isPaused]);
 
   useEffect(() => {
-    if (gameState !== 'playing') return;
+    // Game loop runs in playing OR idle (demo) states
+    if (gameState === 'gameOver') return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -287,26 +312,12 @@ function App() {
         ctx.shadowBlur = 15;
         ctx.shadowColor = '#fff';
         ctx.beginPath();
-        ctx.arc(0, 0, p.size * 0.8, 0, Math.PI * 2);
+        ctx.arc(0, 0, p.size * 0.9, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
       }
 
-      ctx.globalAlpha = 0.3;
-      for(let i = 1; i <= 3; i++) {
-        ctx.save();
-        ctx.translate(-p.vy * i * 0.5, 0);
-        ctx.beginPath();
-        ctx.moveTo(p.size / 2, 0);
-        ctx.lineTo(-p.size / 2, -p.size / 2);
-        ctx.lineTo(-p.size / 4, 0);
-        ctx.lineTo(-p.size / 2, p.size / 2);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-      }
-      ctx.globalAlpha = 1.0;
-
+      // Draw Main Shape
       ctx.shadowBlur = 25;
       ctx.shadowColor = p.color === 'rainbow' ? '#fff' : p.color;
       
@@ -320,21 +331,43 @@ function App() {
       } else {
         ctx.fillStyle = p.color;
       }
-      
+
+      const s = p.size;
       ctx.beginPath();
-      ctx.moveTo(p.size / 2, 0);
-      ctx.lineTo(-p.size / 2, -p.size / 2);
-      ctx.lineTo(-p.size / 4, 0);
-      ctx.lineTo(-p.size / 2, p.size / 2);
+      switch(p.shape) {
+        case 'box':
+          ctx.rect(-s/2, -s/2, s, s);
+          break;
+        case 'diamond':
+          ctx.moveTo(0, -s/2); ctx.lineTo(s/2, 0); ctx.lineTo(0, s/2); ctx.lineTo(-s/2, 0);
+          break;
+        case 'orb':
+          ctx.arc(0, 0, s/2, 0, Math.PI * 2);
+          break;
+        case 'star':
+          for (let i = 0; i < 5; i++) {
+            ctx.lineTo(Math.cos((18 + i * 72) / 180 * Math.PI) * s/2, -Math.sin((18 + i * 72) / 180 * Math.PI) * s/2);
+            ctx.lineTo(Math.cos((54 + i * 72) / 180 * Math.PI) * s/4, -Math.sin((54 + i * 72) / 180 * Math.PI) * s/4);
+          }
+          break;
+        case 'arrow':
+        default:
+          ctx.moveTo(s/2, 0); ctx.lineTo(-s/2, -s/2); ctx.lineTo(-s/4, 0); ctx.lineTo(-s/2, s/2);
+          break;
+      }
       ctx.closePath();
       ctx.fill();
 
+      // Inner Detail
       ctx.fillStyle = '#fff';
+      ctx.globalAlpha = 0.5;
       ctx.beginPath();
-      ctx.moveTo(p.size / 4, 0);
-      ctx.lineTo(-p.size / 4, -p.size / 4);
-      ctx.lineTo(-p.size / 8, 0);
-      ctx.lineTo(-p.size / 4, p.size / 4);
+      switch(p.shape) {
+        case 'box': ctx.rect(-s/4, -s/4, s/2, s/2); break;
+        case 'orb': ctx.arc(0, 0, s/4, 0, Math.PI * 2); break;
+        default: 
+          ctx.moveTo(s/4, 0); ctx.lineTo(-s/4, -s/4); ctx.lineTo(-s/8, 0); ctx.lineTo(-s/4, s/4);
+      }
       ctx.closePath();
       ctx.fill();
       ctx.restore();
@@ -347,6 +380,20 @@ function App() {
       // Calculate dynamic speed and spawn rate
       const currentSpeed = OBSTACLE_SPEED + (score * 0.15); // Faster increase
       const currentSpawnRate = Math.max(35, Math.floor(SPAWN_RATE - score * 0.8));
+
+      // AI Bot logic for Demo Mode (Idle)
+      if (gameState === 'idle' && !isPaused) {
+        const p = g.player;
+        const upcomingObs = g.obstacles.find(o => o.x > p.x && o.x < p.x + 200);
+        if (upcomingObs) {
+          // If obstacle is at bottom, jump
+          if (upcomingObs.y > 0 && p.y + p.size > upcomingObs.y - 40) {
+            p.vy = JUMP_FORCE;
+          }
+        }
+        // Keep in screen
+        if (p.y > CANVAS_HEIGHT - 100) p.vy = JUMP_FORCE;
+      }
 
       if (!isPaused) {
         g.frame++;
@@ -502,21 +549,29 @@ function App() {
               g.shake = 10;
               createParticles(obs.x, obs.y, '#fff', 20);
             } else {
-              setGameState('gameOver');
-              playSound('hit');
-              speak("Critical failure. System reboot required.");
-              g.flash = { color: '#ff0055', alpha: 0.8 };
-              g.shake = 15;
+              if (gameState === 'idle') {
+                // In demo, just bounce or reset instead of Game Over
+                g.player.vy = JUMP_FORCE;
+                g.flash = { color: '#ff0055', alpha: 0.2 };
+              } else {
+                setGameState('gameOver');
+                playSound('hit');
+                speak("Critical failure. System reboot required.");
+                g.flash = { color: '#ff0055', alpha: 0.8 };
+                g.shake = 15;
+              }
             }
           }
           if (obs.x + obs.w < g.player.x && !obs.passed) {
             obs.passed = true;
-            setScore(s => s + 1);
-            setCoins(c => {
-              const next = c + 1;
-              localStorage.setItem('neon-dash-coins', next.toString());
-              return next;
-            });
+            if (gameState === 'playing') {
+              setScore(s => s + 1);
+              setCoins(c => {
+                const next = c + 10;
+                localStorage.setItem('neon-dash-coins', next.toString());
+                return next;
+              });
+            }
           }
         });
 
@@ -804,88 +859,132 @@ function App() {
               <div className="w-full max-w-2xl flex flex-col h-full overflow-hidden">
                 <div className="flex justify-between items-center border-b border-neon-cyan/20 pb-4 mb-8">
                   <h2 className="text-3xl font-light tracking-[0.2em] text-white">NEON VAULT</h2>
-                  <div className="flex items-center gap-2 text-neon-gold font-orbitron text-sm">
-                    <Coins size={20} />
-                    <span>{coins} NEON SHARDS</span>
+                  <div className="flex items-center gap-6">
+                    <div className="flex gap-4">
+                      {['skins', 'chassis', 'upgrades'].map(tab => (
+                        <button 
+                          key={tab}
+                          onClick={() => setShopTab(tab)}
+                          className={`text-[10px] tracking-[0.2em] uppercase pb-1 border-b-2 transition-all ${shopTab === tab ? 'text-neon-cyan border-neon-cyan' : 'text-white/30 border-transparent hover:text-white'}`}
+                        >
+                          {tab}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 text-neon-gold font-orbitron text-sm">
+                      <Coins size={20} />
+                      <span>{coins} NEON SHARDS</span>
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto pr-4 flex flex-col gap-10">
-                  <section>
-                    <h3 className="text-[10px] text-white/40 tracking-[0.3em] mb-6 uppercase">SYSTEM SKINS</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {skins.map(skin => (
-                        <div 
-                          key={skin.name} 
-                          className={`
-                            group relative p-4 flex flex-col items-center gap-3 cursor-pointer transition-all border
-                            ${playerSkin === skin.color ? 'border-neon-cyan shadow-[0_0_15px_rgba(0,242,255,0.2)]' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}
-                            ${!unlockedSkins.includes(skin.color) ? 'opacity-80' : ''}
-                            ${skin.rarity === 'Divine' ? 'border-transparent !bg-black/80 animate-pulse shadow-[0_0_20px_rgba(255,255,255,0.1)]' : ''}
-                          `}
-                          style={skin.rarity === 'Divine' ? {
-                            borderImage: 'linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000) 1'
-                          } : {}}
-                          onClick={() => unlockedSkins.includes(skin.color) ? setPlayerSkin(skin.color) : buySkin(skin)}
-                        >
-                          {skin.color === 'rainbow' ? (
-                            <div className="flex items-center justify-center p-2">
-                              <RainbowCrystal />
+                  {shopTab === 'skins' && (
+                    <section>
+                      <h3 className="text-[10px] text-white/40 tracking-[0.3em] mb-6 uppercase">SYSTEM SKINS</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {skins.map(skin => (
+                          <div 
+                            key={skin.name} 
+                            className={`
+                              group relative p-4 flex flex-col items-center gap-3 cursor-pointer transition-all border
+                              ${playerSkin === skin.color ? 'border-neon-cyan shadow-[0_0_15px_rgba(0,242,255,0.2)]' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}
+                              ${!unlockedSkins.includes(skin.color) ? 'opacity-80' : ''}
+                              ${skin.rarity === 'Divine' ? 'border-transparent !bg-black/80 animate-pulse shadow-[0_0_20px_rgba(255,255,255,0.1)]' : ''}
+                            `}
+                            style={skin.rarity === 'Divine' ? {
+                              borderImage: 'linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000) 1'
+                            } : {}}
+                            onClick={() => unlockedSkins.includes(skin.color) ? setPlayerSkin(skin.color) : buySkin(skin)}
+                          >
+                            {skin.color === 'rainbow' ? (
+                              <div className="flex items-center justify-center p-2">
+                                <RainbowCrystal />
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 rounded shadow-[0_0_15px_currentColor]" style={{ backgroundColor: skin.color }}></div>
+                            )}
+                            <div className="flex flex-col items-center gap-1">
+                              <span className="text-[10px] text-white font-medium">{skin.name}</span>
+                              <span className={`text-[8px] uppercase tracking-wider ${
+                                skin.rarity === 'Common' ? 'text-gray-400' :
+                                skin.rarity === 'Uncommon' ? 'text-green-400' :
+                                skin.rarity === 'Rare' ? 'text-blue-400' :
+                                skin.rarity === 'Epic' ? 'text-purple-400' :
+                                skin.rarity === 'Legendary' ? 'text-yellow-400' :
+                                skin.rarity === 'Mythic' ? 'text-red-400' :
+                                skin.rarity === 'Ultimate' ? 'text-white shadow-[0_0_5px_white]' : 'text-transparent bg-clip-text bg-[linear-gradient(to_right,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8)] font-bold'
+                              }`}>{skin.rarity}</span>
                             </div>
-                          ) : (
-                            <div className="w-8 h-8 rounded shadow-[0_0_15px_currentColor]" style={{ backgroundColor: skin.color }}></div>
-                          )}
-                          <div className="flex flex-col items-center gap-1">
-                            <span className="text-[10px] text-white font-medium">{skin.name}</span>
-                            <span className={`text-[8px] uppercase tracking-wider ${
-                              skin.rarity === 'Common' ? 'text-gray-400' :
-                              skin.rarity === 'Uncommon' ? 'text-green-400' :
-                              skin.rarity === 'Rare' ? 'text-blue-400' :
-                              skin.rarity === 'Epic' ? 'text-purple-400' :
-                              skin.rarity === 'Legendary' ? 'text-yellow-400' :
-                              skin.rarity === 'Mythic' ? 'text-red-400' :
-                              skin.rarity === 'Ultimate' ? 'text-white shadow-[0_0_5px_white]' : 'text-transparent bg-clip-text bg-[linear-gradient(to_right,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8)] font-bold'
-                            }`}>{skin.rarity}</span>
+                            {!unlockedSkins.includes(skin.color) ? (
+                              <div className="flex items-center gap-1.5 text-neon-gold text-xs">
+                                <Coins size={12} />
+                                <span>{skin.price}</span>
+                              </div>
+                            ) : (
+                              <span className="text-[8px] text-white/30">OWNED</span>
+                            )}
                           </div>
-                          {!unlockedSkins.includes(skin.color) ? (
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {shopTab === 'chassis' && (
+                    <section>
+                      <h3 className="text-[10px] text-white/40 tracking-[0.3em] mb-6 uppercase">HULL CHASSIS</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                          { id: 'arrow', name: 'Interstate', icon: '▲' },
+                          { id: 'box', name: 'Brute', icon: '■' },
+                          { id: 'diamond', name: 'Prism', icon: '◆' },
+                          { id: 'orb', name: 'Zenith', icon: '●' },
+                          { id: 'star', name: 'Nova', icon: '★' }
+                        ].map(shape => (
+                          <div 
+                            key={shape.id}
+                            onClick={() => {
+                              setPlayerShape(shape.id);
+                              localStorage.setItem('neon-dash-shape', shape.id);
+                            }}
+                            className={`p-6 flex flex-col items-center gap-4 border transition-all cursor-pointer ${playerShape === shape.id ? 'border-neon-cyan bg-neon-cyan/5' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}`}
+                          >
+                            <span className="text-3xl text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">{shape.icon}</span>
+                            <span className="text-[10px] text-white uppercase tracking-widest">{shape.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+
+                  {shopTab === 'upgrades' && (
+                    <section>
+                      <h3 className="text-[10px] text-white/40 tracking-[0.3em] mb-6 uppercase">HARDWARE UPGRADES</h3>
+                      <div className="flex flex-col gap-4">
+                        <div 
+                          className={`
+                            flex items-center gap-6 p-4 border transition-all cursor-pointer
+                            ${upgrades.autoShield ? 'border-green-500 bg-green-500/5' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}
+                          `}
+                          onClick={() => !upgrades.autoShield && buyUpgrade('autoShield', 1500)}
+                        >
+                          <ShieldCheck size={24} className="text-neon-cyan" />
+                          <div className="flex-1 flex flex-col gap-1">
+                            <span className="text-sm text-white font-medium">Auto-Shield</span>
+                            <span className="text-xs text-white/40">Start mission with shield active</span>
+                          </div>
+                          {!upgrades.autoShield ? (
                             <div className="flex items-center gap-1.5 text-neon-gold text-xs">
                               <Coins size={12} />
-                              <span>{skin.price}</span>
+                              <span>1500</span>
                             </div>
                           ) : (
-                            <span className="text-[8px] text-white/30">OWNED</span>
+                            <span className="text-[10px] text-green-400 font-bold tracking-widest">INSTALLED</span>
                           )}
                         </div>
-                      ))}
-                    </div>
-                  </section>
-
-                  <section>
-                    <h3 className="text-[10px] text-white/40 tracking-[0.3em] mb-6 uppercase">HARDWARE UPGRADES</h3>
-                    <div className="flex flex-col gap-4">
-                      <div 
-                        className={`
-                          flex items-center gap-6 p-4 border transition-all cursor-pointer
-                          ${upgrades.autoShield ? 'border-green-500 bg-green-500/5' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}
-                        `}
-                        onClick={() => !upgrades.autoShield && buyUpgrade('autoShield', 1500)}
-                      >
-                        <ShieldCheck size={24} className="text-neon-cyan" />
-                        <div className="flex-1 flex flex-col gap-1">
-                          <span className="text-sm text-white font-medium">Auto-Shield</span>
-                          <span className="text-xs text-white/40">Start mission with shield active</span>
-                        </div>
-                        {!upgrades.autoShield ? (
-                          <div className="flex items-center gap-1.5 text-neon-gold text-xs">
-                            <Coins size={12} />
-                            <span>1500</span>
-                          </div>
-                        ) : (
-                          <span className="text-[10px] text-green-400 font-bold tracking-widest">INSTALLED</span>
-                        )}
                       </div>
-                    </div>
-                  </section>
+                    </section>
+                  )}
                 </div>
 
                 <button 
