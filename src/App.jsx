@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Play, RotateCcw, Trophy, Zap, Pause, PlayCircle, ShoppingCart, Coins, ShieldCheck, Sparkles } from 'lucide-react'
+import RainbowCrystal from './RainbowCrystal'
 import './App.css'
 
 const CANVAS_WIDTH = 800;
@@ -160,15 +161,6 @@ function App() {
       speak("System upgrade integrated.");
       playSound('powerup');
     }
-  };
-
-  const cycleSkin = (e) => {
-    e.stopPropagation();
-    const currentIndex = skins.findIndex(s => s.color === playerSkin);
-    const nextIndex = (currentIndex + 1) % skins.length;
-    const newSkin = skins[nextIndex].color;
-    setPlayerSkin(newSkin);
-    localStorage.setItem('neon-dash-skin', newSkin);
   };
 
   const startGame = () => {
@@ -775,15 +767,6 @@ function App() {
               
               <div className="flex gap-4">
                 <button 
-                  onClick={cycleSkin} 
-                  className="px-8 py-3 text-sm font-medium tracking-[0.1em] text-white border border-white/30 -skew-x-12 transition-all hover:bg-white/10 hover:border-white"
-                >
-                  <div className="flex items-center gap-3 skew-x-12">
-                    <span className="w-3 h-3 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: playerSkin === 'rainbow' ? '#fff' : playerSkin }}></span>
-                    <span>CHANGE SHIP</span>
-                  </div>
-                </button>
-                <button 
                   onClick={() => setShopOpen(true)} 
                   className="px-8 py-3 text-sm font-medium tracking-[0.1em] text-neon-cyan border border-neon-cyan/30 -skew-x-12 transition-all hover:bg-neon-cyan/10 hover:border-neon-cyan"
                 >
@@ -826,7 +809,7 @@ function App() {
                             group relative p-4 flex flex-col items-center gap-3 cursor-pointer transition-all border
                             ${playerSkin === skin.color ? 'border-neon-cyan shadow-[0_0_15px_rgba(0,242,255,0.2)]' : 'border-white/10 hover:border-white/30 hover:bg-white/5'}
                             ${!unlockedSkins.includes(skin.color) ? 'opacity-80' : ''}
-                            ${skin.rarity === 'Divine' ? 'border-transparent !bg-black/80' : ''}
+                            ${skin.rarity === 'Divine' ? 'border-transparent !bg-black/80 animate-pulse shadow-[0_0_20px_rgba(255,255,255,0.1)]' : ''}
                           `}
                           style={skin.rarity === 'Divine' ? {
                             borderImage: 'linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000) 1'
@@ -834,7 +817,9 @@ function App() {
                           onClick={() => unlockedSkins.includes(skin.color) ? setPlayerSkin(skin.color) : buySkin(skin)}
                         >
                           {skin.color === 'rainbow' ? (
-                            <div className="w-8 h-8 rounded shadow-[0_0_15px_rgba(255,255,255,0.4)] bg-[linear-gradient(45deg,#ff0000,#ff7300,#fffb00,#48ff00,#00ffd5,#002bff,#7a00ff,#ff00c8,#ff0000)] bg-[length:400%_400%] animate-[rainbow-animation_3s_ease_infinite]"></div>
+                            <div className="flex items-center justify-center p-2">
+                              <RainbowCrystal />
+                            </div>
                           ) : (
                             <div className="w-8 h-8 rounded shadow-[0_0_15px_currentColor]" style={{ backgroundColor: skin.color }}></div>
                           )}
