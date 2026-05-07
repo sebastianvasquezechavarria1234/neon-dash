@@ -934,7 +934,7 @@ function App() {
 
               <div className="flex flex-col gap-2 w-80">
                 <button 
-                  className="group relative px-10 py-4 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3 active:scale-95"
+                  className="group relative px-10 py-4 text-[15px] font-light text-neon-cyan border border-neon-cyan/50 rounded-none bg-neon-cyan/5 transition-all hover:bg-neon-cyan/20 hover:scale-110 hover:-rotate-3 active:scale-95"
                   onClick={(e) => {
                     e.stopPropagation();
                     startGame();
@@ -951,7 +951,7 @@ function App() {
                       e.stopPropagation();
                       setShopOpen(true);
                     }} 
-                    className="relative flex-1 px-4 py-3 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3"
+                    className="relative flex-1 px-4 py-3 text-[15px] font-light text-neon-pink border border-neon-pink/50 rounded-none bg-neon-pink/5 transition-all hover:bg-neon-pink/20 hover:scale-110 hover:-rotate-3"
                   >
                     <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[7px] px-2 py-0.5 font-bold z-10 shadow-lg">
                       Nuevos
@@ -966,7 +966,7 @@ function App() {
                       e.stopPropagation();
                       setShowProfile(true);
                     }} 
-                    className="flex-1 px-4 py-3 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3"
+                    className="flex-1 px-4 py-3 text-[15px] font-light text-neon-gold border border-neon-gold/50 rounded-none bg-neon-gold/5 transition-all hover:bg-neon-gold/20 hover:scale-110 hover:-rotate-3"
                   >
                     <div className="flex items-center justify-center gap-2">
                       <Gamepad2 size={16} />
@@ -980,7 +980,7 @@ function App() {
                     e.stopPropagation();
                     setShowMaps(true);
                   }} 
-                  className="w-full py-3 text-[15px] font-light text-white border-2 border-white rounded-none transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3"
+                  className="w-full py-3 text-[15px] font-light text-emerald-400 border border-emerald-400/50 rounded-none bg-emerald-400/5 transition-all hover:bg-emerald-400/20 hover:scale-110 hover:-rotate-3"
                 >
                   <div className="flex items-center justify-center gap-3">
                     <Compass size={16} />
@@ -1010,9 +1010,9 @@ function App() {
                         <button 
                           key={tab}
                           onClick={() => setShopTab(tab)}
-                          className={`text-[10px] tracking-[0.2em] uppercase pb-1 border-b-2 transition-all ${shopTab === tab ? 'text-neon-cyan border-neon-cyan' : 'text-white/30 border-transparent hover:text-white'}`}
+                          className={`text-[12px] tracking-[0.2em] pb-1 border-b transition-all ${shopTab === tab ? 'text-neon-cyan border-neon-cyan' : 'text-white/30 border-transparent hover:text-white hover:scale-110 hover:-rotate-3'}`}
                         >
-                          {tab}
+                          {tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </button>
                       ))}
                     </div>
@@ -1133,10 +1133,10 @@ function App() {
                 </div>
 
                 <button 
-                  className="mt-8 px-10 py-3 text-xs font-medium tracking-[0.1em] text-white border border-white -skew-x-12 transition-all hover:bg-white hover:text-black self-center"
+                  className="mt-8 px-10 py-3 text-[15px] font-light text-white border border-white/50 rounded-none bg-white/5 transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3 self-center"
                   onClick={() => setShopOpen(false)}
                 >
-                  <span className="block skew-x-12">RETURN TO HANGAR</span>
+                  <span>Return to Hangar</span>
                 </button>
               </div>
             </motion.div>
@@ -1155,11 +1155,11 @@ function App() {
                     e.stopPropagation();
                     togglePause(e);
                   }}
-                  className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-cyan border border-neon-cyan -skew-x-12 transition-all hover:bg-neon-cyan hover:text-black hover:scale-105 active:scale-95"
+                  className="px-10 py-3 text-[15px] font-light text-neon-cyan border border-neon-cyan/50 rounded-none bg-neon-cyan/5 transition-all hover:bg-neon-cyan/10 hover:scale-110 hover:-rotate-3 active:scale-95"
                 >
-                  <div className="flex items-center gap-3 skew-x-12">
+                  <div className="flex items-center gap-3">
                     <Play size={16} strokeWidth={1.5} />
-                    <span>RESUME</span>
+                    <span>Resume</span>
                   </div>
                 </button>
                 <button 
@@ -1167,11 +1167,11 @@ function App() {
                     e.stopPropagation();
                     goToMainMenu();
                   }}
-                  className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-white/50 border border-white/20 -skew-x-12 transition-all hover:bg-white/10 hover:text-white hover:border-white"
+                  className="px-10 py-3 text-[15px] font-light text-white/70 border border-white/30 rounded-none bg-white/5 transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3"
                 >
-                  <div className="flex items-center gap-3 skew-x-12">
+                  <div className="flex items-center gap-3">
                     <Home size={16} strokeWidth={1.5} />
-                    <span>MENU</span>
+                    <span>Menu</span>
                   </div>
                 </button>
               </div>
@@ -1215,11 +1215,11 @@ function App() {
                     e.stopPropagation();
                     startGame();
                   }} 
-                  className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-neon-pink border border-neon-pink -skew-x-12 transition-all hover:bg-neon-pink hover:text-white hover:scale-105 active:scale-95"
+                  className="px-10 py-3 text-[15px] font-light text-neon-pink border border-neon-pink/50 rounded-none bg-neon-pink/5 transition-all hover:bg-neon-pink/10 hover:scale-110 hover:-rotate-3 active:scale-95"
                 >
-                  <div className="flex items-center gap-3 skew-x-12">
+                  <div className="flex items-center gap-3">
                     <RotateCcw size={20} />
-                    <span>REBOOT</span>
+                    <span>Reboot</span>
                   </div>
                 </button>
                 <button 
@@ -1227,11 +1227,11 @@ function App() {
                     e.stopPropagation();
                     goToMainMenu();
                   }} 
-                  className="px-10 py-3 text-sm font-medium tracking-[0.2em] text-white/50 border border-white/20 -skew-x-12 transition-all hover:bg-white/10 hover:text-white hover:border-white"
+                  className="px-10 py-3 text-[15px] font-light text-white/70 border border-white/30 rounded-none bg-white/5 transition-all hover:bg-white/10 hover:scale-110 hover:-rotate-3"
                 >
-                  <div className="flex items-center gap-3 skew-x-12">
+                  <div className="flex items-center gap-3">
                     <Home size={20} />
-                    <span>MENU</span>
+                    <span>Menu</span>
                   </div>
                 </button>
               </div>
@@ -1280,7 +1280,7 @@ function App() {
 
                 <button 
                   onClick={() => setShowProfile(false)}
-                  className="w-full py-4 text-sm font-medium tracking-[0.2em] bg-white text-black hover:bg-neon-cyan transition-all uppercase"
+                  className="w-full py-4 text-[15px] font-light text-neon-cyan border border-neon-cyan/50 rounded-none bg-neon-cyan/5 transition-all hover:bg-neon-cyan/10 hover:scale-110 hover:-rotate-3"
                 >
                   Confirm Registry
                 </button>
@@ -1331,7 +1331,7 @@ function App() {
 
                 <button 
                   onClick={() => setShowMaps(false)}
-                  className="w-full py-4 text-sm font-medium tracking-[0.2em] bg-white text-black hover:bg-neon-cyan transition-all uppercase"
+                  className="w-full py-4 text-[15px] font-light text-emerald-400 border border-emerald-400/50 rounded-none bg-emerald-400/5 transition-all hover:bg-emerald-400/10 hover:scale-110 hover:-rotate-3"
                 >
                   Confirm Deployment
                 </button>
